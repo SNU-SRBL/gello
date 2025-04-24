@@ -117,12 +117,13 @@ def main(args):
                     )
             if args.start_joints is None:
                 reset_joints = np.deg2rad(
-                    [0, -90, 90, -90, -90, 0, 0]
+                    [0, -90, 90, -90, -90, 0] # ,0]
                 )  # Change this to your own reset joints
             else:
                 reset_joints = args.start_joints
             agent = GelloAgent(port=gello_port, start_joints=args.start_joints)
             curr_joints = env.get_obs()["joint_positions"]
+            curr_joints = np.array(curr_joints) # Editted - curr_joints is list type
             if reset_joints.shape == curr_joints.shape:
                 max_delta = (np.abs(curr_joints - reset_joints)).max()
                 steps = min(int(max_delta / 0.01), 100)
@@ -234,7 +235,7 @@ def main(args):
                 print(f"Saving to {save_path}")
             elif state == "save":
                 assert save_path is not None, "something went wrong"
-                save_frame(save_path, dt, obs, action)
+                # save_frame(save_path, dt, obs, action) # Save Frame
             elif state == "normal":
                 save_path = None
             else:
