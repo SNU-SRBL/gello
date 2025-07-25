@@ -14,7 +14,7 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 
 ### 1. Required Hardware Connections
 
-* Connect 5V power to the **Dynamixel Power Hub Board** to activate the GELLO device after connecting the **U2D2** USB device (for Dynamixel control) to your desktop.
+* Connect 5V power to the **Dynamixel Power Hub Board** to activate the GELLO device after connecting the **U2D2** USB device to your desktop.
 * Power and connect the **FT sensor** and **camera** to the PC.
 * Connect the **UR5e robot** via Ethernet.
 
