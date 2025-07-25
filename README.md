@@ -2,7 +2,7 @@
 
 This is the SRBL group's fork of [GELLO](https://wuphilipp.github.io/gello_site/), a general, low-cost, and intuitive teleoperation framework for robot manipulators. The original repository and documentation can be found [here](https://github.com/wuphilipp/gello_software).
 
-In this fork, we organize multiple GELLO system variations developed by our lab (SRBL – Soft Robotics and Bioinspired Laboratory) for different purposes:
+In this fork, we organize multiple GELLO system variations developed by our lab (SRBL – Soft Robotics and Bionics Laboratory) for different purposes:
 
 ### 📁 Folder Overview
 
