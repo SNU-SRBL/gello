@@ -65,7 +65,7 @@ conda activate <your-conda-env>
 Add the current directory to the `PYTHONPATH`:
 
 ```bash
-cd ~/gello_ft/
+cd ~/gello/gello_ft/
 export PYTHONPATH="$PYTHONPATH:$(pwd)"
 ```
 
