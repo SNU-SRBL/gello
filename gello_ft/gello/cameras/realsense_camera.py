@@ -121,3 +121,6 @@ if __name__ == "__main__":
     rs = RealSenseCamera(flip=True, device_id=device_ids[0])
     im, depth = rs.read()
     _debug_read(rs, save_datastream=True)
+
+
+#LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6 \
