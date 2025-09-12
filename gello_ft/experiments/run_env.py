@@ -150,8 +150,10 @@ def main(args):
     # going to start position
     print("Going to start position")
     start_pos = agent.act(env.get_obs())
+    print("pass1")
     obs = env.get_obs()
     joints = obs["joint_positions"]
+    print('pass2')
 
     abs_deltas = np.abs(start_pos - joints)
     id_max_joint_delta = np.argmax(abs_deltas)
