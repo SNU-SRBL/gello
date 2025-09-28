@@ -33,6 +33,7 @@ Set the IP address of your **desktop** to match the UR robot’s subnet:
 
 To verify that all USB devices (GELLO, gripper, FT sensor) are correctly recognized, run:
 ```bash
+sudo dmesg -w
 dmesg | grep tty
 ls /dev/serial/by-id
 ```

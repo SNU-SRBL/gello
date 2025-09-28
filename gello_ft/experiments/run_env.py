@@ -52,8 +52,8 @@ def main(args):
         from gello.zmq_core.camera_node import ZMQClientCamera
         camera_clients = {
             # you can optionally add camera nodes here for imitation learning purposes
-            "wrist": ZMQClientCamera(port=args.wrist_camera_port, host=args.hostname),
-            "base": ZMQClientCamera(port=args.base_camera_port, host=args.hostname),
+            # "wrist": ZMQClientCamera(port=args.wrist_camera_port, host=args.hostname),
+            # "base": ZMQClientCamera(port=args.base_camera_port, host=args.hostname),
         }
         robot_client = ZMQClientRobot(port=args.robot_port, host=args.hostname)
     env = RobotEnv(robot_client, control_rate_hz=args.hz, camera_dict=camera_clients)
@@ -150,10 +150,8 @@ def main(args):
     # going to start position
     print("Going to start position")
     start_pos = agent.act(env.get_obs())
-    print("pass1")
     obs = env.get_obs()
     joints = obs["joint_positions"]
-    print('pass2')
 
     abs_deltas = np.abs(start_pos - joints)
     id_max_joint_delta = np.argmax(abs_deltas)

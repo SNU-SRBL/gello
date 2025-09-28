@@ -50,8 +50,8 @@ class URRobot(Robot):
         import time
 
         time.sleep(0.01)
-        # gripper_pos = self.gripper.get_current_position()
-        gripper_pos = 0 # Fake
+        gripper_pos = self.gripper.get_current_position()
+        # gripper_pos = 0 # Fake
         # assert 0 <= gripper_pos <= 255, "Gripper position must be between 0 and 255"
         assert 0 <= gripper_pos <= 740, "Gripper position must be between 0 and 740"
         return gripper_pos / 740
