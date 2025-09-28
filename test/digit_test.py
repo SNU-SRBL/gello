@@ -9,7 +9,7 @@ from pathlib import Path
 # Find yours via:  ls -l /dev/v4l/by-id/
 DIGIT_R = "/dev/v4l/by-id/usb-Facebook_DIGIT_D21119-video-index0"
 DIGIT_L = "/dev/v4l/by-id/usb-Facebook_DIGIT_D21273-video-index0"
-W, H, FPS = 320, 240, 15         # capture resolution for each cam
+W, H, FPS = 320, 240, 30          # capture resolution for each cam
 WINDOW_NAME = "DIGIT R | L (1x2)"
 
 
