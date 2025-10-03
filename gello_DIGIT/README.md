@@ -50,7 +50,7 @@ Expected output (example):
 ```
 /dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTA7NLK4-if00-port0
 ```
-Use this path in the `--port` argument below.
+Use this path in the `--port` argument below.<br>
 Verify the video index for **Camera** and **DIGIT sensor** with `sudo dmesg -w`.
 
 ---
