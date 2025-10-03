@@ -1,10 +1,11 @@
 # GELLO with Force-Torque Sensor (`gello_ft`)
 
-This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, extended with 6-axis force-torque sensing capabilities. It integrates the following hardware:
+This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, extended with 6-axis force-torque sensing and vision-based tactile sensing capabilities. It integrates the following hardware:
 
 * UR5e Robot Arm
 * Robotis Gripper (RH-P12-RN)
 * Robotous 6-axis Force-Torque Sensor
+* Digit Vision-based Tactile Sensor
 * Intel RealSense Camera
 * GELLO Dynamixel-based Teleoperation Device
 
@@ -15,7 +16,7 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 ### 1. Required Hardware Connections
 
 * Connect 5V power to the **Dynamixel Power Hub Board** to activate the GELLO device after connecting the **U2D2** USB device to your desktop.
-* Power and connect the **FT sensor** and **camera** to the PC.
+* Power and connect the **FT sensor**, **DIGIT sensor**, and **camera** to the PC.
 * Connect the **UR5e robot** via Ethernet.
 
 ---
@@ -25,7 +26,7 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 Set the IP address of your **desktop** to match the UR robot’s subnet:
 
 * **Robot IP**: `192.168.0.10`
-* **Desktop IP example**: `192.168.0.101`
+* **Desktop IP example**: `192.168.0.1`
 
 ---
 
