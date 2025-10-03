@@ -15,6 +15,9 @@ In this fork, we organize multiple GELLO system variations developed by our lab 
 * **`gello_youngjin/`**
   A customized GELLO configuration tailored for Youngjin Choi's project.
 
+* **`gello_DIGIT/`**
+  GELLO system extended with 6-axis Force-Torque sensor and DIGIT vision-based tactile sensor.
+
 We will provide detailed instructions and descriptions inside each folder’s own `README.md`.
 
 

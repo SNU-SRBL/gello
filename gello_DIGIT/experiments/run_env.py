@@ -41,7 +41,9 @@ class Args:
     data_dir: str = "~/bc_data"
     bimanual: bool = False
     verbose: bool = False
-    sensor_ft: bool = False
+    sensor_ft: bool = False     # FT Sensor
+    digit_R_port: int = 5002    # Right DIGIT camera port
+    digit_L_port: int = 5003    # Left DIGIT camera port
 
 
 def main(args):
@@ -54,6 +56,8 @@ def main(args):
             # you can optionally add camera nodes here for imitation learning purposes
             # "wrist": ZMQClientCamera(port=args.wrist_camera_port, host=args.hostname),
             # "base": ZMQClientCamera(port=args.base_camera_port, host=args.hostname),
+            # "digit_R": ZMQClientCamera(port=args.digit_R_port, host=args.hostname),
+            # "digit_L": ZMQClientCamera(port=args.bdigit_L_port, host=args.hostname),
         }
         robot_client = ZMQClientRobot(port=args.robot_port, host=args.hostname)
     env = RobotEnv(robot_client, control_rate_hz=args.hz, camera_dict=camera_clients)
