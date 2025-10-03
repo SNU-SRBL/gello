@@ -25,7 +25,7 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 Set the IP address of your **desktop** to match the UR robot’s subnet:
 
 * **Robot IP**: `192.168.0.10`
-* **Desktop IP example**: `192.168.0.101`
+* **Desktop IP example**: `192.168.0.1`
 
 ---
 
