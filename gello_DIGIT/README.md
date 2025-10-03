@@ -51,6 +51,7 @@ Expected output (example):
 /dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTA7NLK4-if00-port0
 ```
 Use this path in the `--port` argument below.
+Verify the video index for **Camera** and **DIGIT sensor** with `sudo dmesg -w`.
 
 ---
 
@@ -108,6 +109,7 @@ python experiments/launch_camera_nodes.py --hostname 127.0.0.1
 
 python experiments/launch_camera_clients.py --hostname 127.0.0.1
 ```
+> ⚠️ Check the video port number and update the port number in `experiments/run_evn.py`.
 
 ---
 
