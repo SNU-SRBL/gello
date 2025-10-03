@@ -1,4 +1,4 @@
-# GELLO with Force-Torque Sensor (`gello_ft`)
+# GELLO with Digit Vision-based Tactile Sensor (`gello_DIGIT`)
 
 This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, extended with 6-axis force-torque sensing and vision-based tactile sensing capabilities. It integrates the following hardware:
 
