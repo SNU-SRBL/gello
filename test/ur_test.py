@@ -3,7 +3,7 @@ import rtde_receive
 import time
 
 def main():
-    ROBOT_IP = "192.168.0.10"  # Change to your robot's IP
+    ROBOT_IP = "192.168.10.2"  # Change to your robot's IP
 
     # Connect to RTDE interfaces
     rtde_c = rtde_control.RTDEControlInterface(ROBOT_IP)

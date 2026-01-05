@@ -25,8 +25,8 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 
 Set the IP address of your **desktop** to match the UR robot’s subnet:
 
-* **Robot IP**: `192.168.0.10`
-* **Desktop IP example**: `192.168.0.1`
+* **Robot IP**: `192.168.10.2`
+* **Desktop IP example**: `192.168.10.1`
 
 ---
 
@@ -121,7 +121,7 @@ python experiments/launch_camera_nodes.py --hostname 127.0.0.1
 ```
 
 ```bash
-python experiments/launch_nodes.py --robot ur --robot_ip=192.168.0.10
+python experiments/launch_nodes.py --robot ur --robot_ip=192.168.10.2
 ```
 
 ```bash
