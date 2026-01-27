@@ -1,3 +1,9 @@
+"""
+Modified from the original env.py in gello repository.
+Added fingertip sensor reading in observation.
+Modified by Seongjun Koh (Soft Robotics and Bionics Lab, Seoul National University)
+"""
+
 import time
 from typing import Any, Dict, Optional
 
@@ -77,6 +83,7 @@ class RobotEnv:
         observations["joint_velocities"] = robot_obs["joint_velocities"]
         observations["ee_pos_quat"] = robot_obs["ee_pos_quat"]
         observations["gripper_position"] = robot_obs["gripper_position"]
+        observations["fingertip_sensor"] = robot_obs["fingertip_sensor"]
         return observations
 
 
