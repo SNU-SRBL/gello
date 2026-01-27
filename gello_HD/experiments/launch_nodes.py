@@ -24,8 +24,11 @@ class Args:
 def launch_robot_server(args: Args):
     port = args.robot_port
     if args.robot == "ur":
-        from gello.robots.urHD import URRobot # May modify this part and the urHD file to enable the Inspire gripper
-        robot = URRobot(robot_ip=args.robot_ip)
+        from gello.robots.urHD import URTesollo # May modify this part and the urHD file to enable the Inspire gripper
+        robot = URTesollo(robot_ip=args.robot_ip)
+    elif args.robot == "urI":
+        from gello.robots.urHD import URInspire # May modify this part and the urHD file to enable the Inspire gripper
+        robot = URInspire(robot_ip=args.robot_ip)
     else:
         raise NotImplementedError(
             f"Robot {args.robot} not implemented, choose one of: sim_ur, xarm, ur, bimanual_ur, none"

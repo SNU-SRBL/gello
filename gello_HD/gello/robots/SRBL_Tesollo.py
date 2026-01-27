@@ -1,6 +1,16 @@
 """
-File containing the SRBL Tesollo gripper class for controll the gripper and obtaining sensor data.
+File containing the SRBL Tesollo gripper class for controlling the gripper and obtaining sensor data.
 Referenced the document and code samples given by Tesollo.
+
+For use (Python 3.8+):
+uv add dgsdk
+OR
+pip install dgsdk
+OR
+git clone https://github.com/tesollo/dgsdk-python.git
+cd dgsdk-python
+uv sync
+
 Written by Seongjun Koh (Soft Robotics and Bionics Lab, Seoul National University)
 """
 
@@ -8,7 +18,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "delto_py" / "src"))
 
 from dgsdk import (
     DGGripper,
@@ -21,15 +31,15 @@ from dgsdk import (
     DGResult,
 )
 
-SRBL_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
-SRBL_FINGER_UPPER_LIMIT = 60.0 # Upper limit of the finger joint position
+SRBL_TESOLLO_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
+SRBL_TESOLLO_FINGER_UPPER_LIMIT = 60.0 # Upper limit of the finger joint position
 
-SRBL_FINGER_NUMBER = 1 # Number of the finger to control
+SRBL_TESOLLO_FINGER_NUMBER = 1 # Number of the finger to control
 
 class SRBL_Tesollo_gripper:
     def __init__(self):
         self.error_flag = False
-        self.joint_number = SRBL_FINGER_NUMBER * 4 - 1
+        self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 - 1
 
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
@@ -78,19 +88,19 @@ class SRBL_Tesollo_gripper:
     def get_current_position(self):
         data = self.gripper.get_gripper_data()
         pos = float(data.joint[self.joint_number])
-        pos = min(SRBL_FINGER_UPPER_LIMIT, max(SRBL_FINGER_LOWER_LIMIT, pos))
-        pos = (pos - SRBL_FINGER_LOWER_LIMIT) / (SRBL_FINGER_UPPER_LIMIT - SRBL_FINGER_LOWER_LIMIT) # normalize to [0, 1]
+        pos = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, pos))
+        pos = (pos - SRBL_TESOLLO_FINGER_LOWER_LIMIT) / (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) # normalize to [0, 1]
         return pos
 
     def move(self, target):
-        joint_target = min(SRBL_FINGER_UPPER_LIMIT, max(SRBL_FINGER_LOWER_LIMIT, target))
-        joint_target = joint_target * (SRBL_FINGER_UPPER_LIMIT - SRBL_FINGER_LOWER_LIMIT) + SRBL_FINGER_LOWER_LIMIT
+        joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, target))
+        joint_target = joint_target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
         self.gripper.move_joint(joint_target, self.joint_number)
         return
 
     def get_sensor_values(self):
         data = self.gripper.get_fingertip_sensor_data() # [TODO] Need to confirm the data format
-        lower_idx = 4 * (SRBL_FINGER_NUMBER - 1)
-        upper_idx = 4 * SRBL_FINGER_NUMBER
+        lower_idx = 4 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
+        upper_idx = 4 * SRBL_TESOLLO_FINGER_NUMBER
         sensor = data[lower_idx:upper_idx]
         return sensor
