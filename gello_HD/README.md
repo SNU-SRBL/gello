@@ -3,7 +3,7 @@
 This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, extended with 6-axis force-torque sensing capabilities. It integrates the following hardware:
 
 * UR5e Robot Arm
-* Robotis Gripper (RH-P12-RN)
+* Tesollo DG-5F or Inspire RH56F1
 * Robotous 6-axis Force-Torque Sensor
 * Intel RealSense Camera
 * GELLO Dynamixel-based Teleoperation Device
@@ -34,14 +34,14 @@ Set the IP address of your **desktop** to match the UR robot’s subnet:
 To verify that all USB devices (GELLO, gripper, FT sensor) are correctly recognized, run:
 ```bash
 sudo dmesg -w
-dmesg | grep tty
+sudo dmesg | grep tty
 ls /dev/serial/by-id
 ```
 The expected USB device assignments are:
 | Device        | Port           | Notes                               |
 | ------------- | -------------- | ----------------------------------- |
 | **GELLO**     | `/dev/ttyUSB0` | U2D2 controller for Dynamixels      |
-| **Gripper**   | `/dev/ttyUSB1` | Robotis RH-P12-RN gripper           |
+| **Gripper**   | `/dev/ttyUSB1` | Tesollo or Inspire Gripper          |
 | **FT Sensor** | `/dev/ttyUSB2` | Robotous 6-axis Force-Torque sensor |
 
 Expected output (example):
