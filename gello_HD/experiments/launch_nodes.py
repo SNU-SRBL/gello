@@ -23,7 +23,7 @@ class Args:
 
 def launch_robot_server(args: Args):
     port = args.robot_port
-    if args.robot == "ur":
+    if args.robot == "urT":
         from gello.robots.urHD import URTesollo # May modify this part and the urHD file to enable the Inspire gripper
         robot = URTesollo(robot_ip=args.robot_ip)
     elif args.robot == "urI":

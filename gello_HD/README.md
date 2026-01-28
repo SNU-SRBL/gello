@@ -118,10 +118,14 @@ python experiments/launch_camera_nodes.py --hostname 127.0.0.1
 ```
 
 ```bash
-python experiments/launch_nodes.py --robot ur --robot_ip=192.168.10.2
+# Tesollo
+python experiments/launch_nodes.py --robot urT --robot_ip=192.168.10.2
+
+# Inspire
+python experiments/launch_nodes.py --robot urI --robot_ip=192.168.10.2
 ```
 
 ```bash
-python experiments/run_env.py --agent=gello --use_save_interface --sensor_ft
+python experiments/run_env.py --agent=gello --use_save_interface
 ```
 
