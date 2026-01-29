@@ -18,9 +18,9 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "delto_py" / "src"))
+sys.path.insert(0, str(Path(__file__).parent / "delto_py" / "src"))
 
-from dgsdk import (
+from delto_py.src.dgsdk import (
     DGGripper,
     GripperSystemSetting,
     GripperSetting,
@@ -34,12 +34,12 @@ from dgsdk import (
 SRBL_TESOLLO_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
 SRBL_TESOLLO_FINGER_UPPER_LIMIT = 60.0 # Upper limit of the finger joint position
 
-SRBL_TESOLLO_FINGER_NUMBER = 1 # Number of the finger to control
+SRBL_TESOLLO_FINGER_NUMBER = 2 # Number of the finger to control
 
 class SRBL_Tesollo_gripper:
     def __init__(self):
         self.error_flag = False
-        self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 - 1
+        self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4
 
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
@@ -55,10 +55,15 @@ class SRBL_Tesollo_gripper:
         if self.setting != DGResult.NONE:
             print(f"[ERROR] Gripper setting failed: {self.setting.name}")
             self.error_flag = True
+        else:
+            print("[INFO] Gripper system setting successful.")
+        
         self.connection  = self.gripper.connect()
         if self.connection != DGResult.NONE:
             print(f"[ERROR] Gripper connection failed: {self.connection.name}")
             self.error_flag = True
+        else:
+            print("[INFO] Gripper connection successful.")
 
         self.gripper_setting = GripperSetting.create(
             model=DGModel.DG_5F_LEFT,  # 실제 그리퍼 모델에 맞게 변경
@@ -70,12 +75,16 @@ class SRBL_Tesollo_gripper:
         if self.gripper_option != DGResult.NONE:
             print(f"[ERROR] Gripper option setting failed: {self.gripper_option.name}")
             self.error_flag = True
+        else:
+            print("[INFO] Gripper option setting successful.")
         time.sleep(0.5)
 
         self.start = self.gripper.start()
         if self.start != DGResult.NONE:
             print(f"[ERROR] Gripper start failed: {self.start.name}")
             self.error_flag = True
+        else:
+            print("[INFO] Gripper start successful.")
         time.sleep(0.5)
 
         if self.error_flag:
@@ -93,8 +102,8 @@ class SRBL_Tesollo_gripper:
         return pos
 
     def move(self, target):
-        joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, target))
-        joint_target = joint_target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
+        joint_target = target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
+        joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, joint_target))
         self.gripper.move_joint(joint_target, self.joint_number)
         return
 
@@ -102,5 +111,5 @@ class SRBL_Tesollo_gripper:
         data = self.gripper.get_fingertip_sensor_data() # [TODO] Need to confirm the data format
         lower_idx = 4 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
         upper_idx = 4 * SRBL_TESOLLO_FINGER_NUMBER
-        sensor = data[lower_idx:upper_idx]
+        sensor = data.forceTorque[lower_idx:upper_idx]
         return sensor

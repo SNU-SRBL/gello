@@ -69,7 +69,7 @@ def main(args):
             usb_ports = glob.glob("/dev/serial/by-id/*")
             print(f"Found {len(usb_ports)} ports")
             if len(usb_ports) > 0:
-                gello_port = usb_ports[2]
+                gello_port = usb_ports[0] # Modify for the gello port
                 print(f"using port {gello_port}")
             else:
                 raise ValueError(

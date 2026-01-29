@@ -4,8 +4,6 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 
 * UR5e Robot Arm
 * Tesollo DG-5F or Inspire RH56F1
-* Robotous 6-axis Force-Torque Sensor
-* Intel RealSense Camera
 * GELLO Dynamixel-based Teleoperation Device
 
 ---
@@ -15,7 +13,7 @@ This folder contains a customized version of the [GELLO](https://wuphilipp.githu
 ### 1. Required Hardware Connections
 
 * Connect 5V power to the **Dynamixel Power Hub Board** to activate the GELLO device after connecting the **U2D2** USB device to your desktop.
-* Power and connect the **FT sensor** and **camera** to the PC.
+* Do not connect other devices. If connected, modify the port number for gello in /experiments/run_env.py
 * Connect the **UR5e robot** via Ethernet.
 
 ---

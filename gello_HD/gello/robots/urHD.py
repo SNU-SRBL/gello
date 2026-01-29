@@ -212,7 +212,7 @@ class URInspire(Robot):
             robot_joints, velocity, acceleration, dt, lookahead_time, gain
         )
         if self._use_gripper:
-            gripper_pos = int(joint_state[-1] * 60) # Tesollo # CHANGE to corresponding gripper
+            gripper_pos = int(joint_state[-1]) # Tesollo # CHANGE to corresponding gripper
             self.gripper.move(gripper_pos) # Tesollo # CHANGE to corresponding gripper
         self.robot.waitPeriod(t_start)
 
