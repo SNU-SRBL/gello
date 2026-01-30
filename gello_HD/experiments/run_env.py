@@ -44,7 +44,7 @@ class Args:
     gello_port: Optional[str] = None
     mock: bool = False
     use_save_interface: bool = False
-    data_dir: str = "~/bc_data"
+    data_dir: str = "../rawdata"
     bimanual: bool = False
     verbose: bool = False
     sensor_ft: bool = False
@@ -184,7 +184,6 @@ def main(args):
                 dt_time = datetime.datetime.now()
                 save_path = (
                     Path(args.data_dir).expanduser()
-                    / args.agent
                     / dt_time.strftime("%m%d_%H%M%S")
                 )
                 save_path.mkdir(parents=True, exist_ok=True)
