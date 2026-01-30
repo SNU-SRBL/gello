@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent / "delto_py" / "src"))
 
-from delto_py.src.dgsdk import (
+from dgsdk import (
     DGGripper,
     GripperSystemSetting,
     GripperSetting,
@@ -32,7 +32,7 @@ from delto_py.src.dgsdk import (
 )
 
 SRBL_TESOLLO_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
-SRBL_TESOLLO_FINGER_UPPER_LIMIT = 60.0 # Upper limit of the finger joint position
+SRBL_TESOLLO_FINGER_UPPER_LIMIT = 30.0 # Upper limit of the finger joint position
 
 SRBL_TESOLLO_FINGER_NUMBER = 2 # Number of the finger to control
 
@@ -58,6 +58,15 @@ class SRBL_Tesollo_gripper:
         else:
             print("[INFO] Gripper system setting successful.")
         
+        connected = False
+        def on_connected():
+            nonlocal connected
+            connected = True
+            print("Connection callback!")
+        # self.gripper.on_gripper_data(lambda: print(""))
+        self.gripper.on_connected(on_connected)
+        self.gripper.on_disconnected(lambda: print("Disconnect callback!"))
+
         self.connection  = self.gripper.connect()
         if self.connection != DGResult.NONE:
             print(f"[ERROR] Gripper connection failed: {self.connection.name}")
@@ -70,6 +79,7 @@ class SRBL_Tesollo_gripper:
             joint_count=20,
             finger_count=5,
             moving_inpose=0.5,
+            received_data_type=[1, 2, 0, 0, 5, 0],
         )
         self.gripper_option = self.gripper.set_gripper_option(self.gripper_setting)
         if self.gripper_option != DGResult.NONE:
@@ -105,17 +115,19 @@ class SRBL_Tesollo_gripper:
         joint_target = target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
         joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, joint_target))
         self.gripper.move_joint(joint_target, self.joint_number)
+        self.gripper.move_joint(joint_target, self.joint_number - 1)
+        self.gripper.move_joint(joint_target, self.joint_number - 2)
         return
 
     def get_sensor_values(self):
-        data = self.gripper.get_fingertip_sensor_data() # [TODO] Need to confirm the data format
+        data = self.gripper.get_fingertip_sensor_data() # ReceivedFingertipSensorData
         lower_idx = 6 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
         upper_idx = 6 * SRBL_TESOLLO_FINGER_NUMBER
-        sensor = data.forceTorque[lower_idx:upper_idx]
+        sensor = data.forceTorque[lower_idx:upper_idx] # elements are float type
         return sensor
     
     def get_current_values(self):
         data = self.gripper.get_gripper_data()
-        current = data.current[self.joint_number - 1]
+        current = float(data.current[self.joint_number - 1])
         current /= 1000.0
         return current

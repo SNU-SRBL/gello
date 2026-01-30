@@ -44,7 +44,7 @@ class Args:
     gello_port: Optional[str] = None
     mock: bool = False
     use_save_interface: bool = False
-    data_dir: str = "../rawdata"
+    data_dir: str = "./rawdata"
     bimanual: bool = False
     verbose: bool = False
     sensor_ft: bool = False

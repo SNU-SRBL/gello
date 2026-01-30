@@ -37,7 +37,7 @@ def main():
         # 1. 시스템 설정
         # =====================================================
         system_setting = GripperSystemSetting.create(
-            ip="169.254.186.72",
+            ip="169.254.186.73",
             port=502,
             control_mode=ControlMode.OPERATOR,  # OPERATOR 모드
             communication_mode=CommunicationMode.ETHERNET,
