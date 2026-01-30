@@ -4,13 +4,14 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 data_directory = '../rawdata'
-target_data_directory = '260129_02'
+target_data_directory = '0130_160514'
 
 class SJ_GelloDataProcessor:
     def __init__(self, data_dir):
         self.data_dir = data_dir
         self._data = []
         self._data_loader()
+        self._time_order()
     
     def __del__(self):
         pass
@@ -21,7 +22,7 @@ class SJ_GelloDataProcessor:
                 file_path = os.path.join(self.data_dir, filename)
                 with open(file_path, 'rb') as file:
                     dataframe = self._data_parser(filename, file)
-                self._data.append(dataframe)
+                self._data.append(dataframe)  
     
     def _data_parser(self, filename, file):
         dataframe = {}
@@ -56,11 +57,17 @@ class SJ_GelloDataProcessor:
         avg_time_diff = sum(time_diffs) / (len(time_diffs) + 1)
         Hz = 1 / avg_time_diff if avg_time_diff != 0 else 0
         return Hz
+    
+    def _time_order(self):
+        self._data = sorted(self._data, key=lambda x:x['time'])
 
     def plot_time(self):
         data = self.get_data_dict()
         num = len(data) - 1
         time = data['time']
+        start_time = time[0]
+        for i in range(len(time)):
+            time[i] = (time[i] - start_time).total_seconds()
         rows = 2
         cols = (num + 1) // rows
         fig, ax = plt.subplots(rows, cols, figsize=(15, 10))
