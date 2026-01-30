@@ -90,7 +90,7 @@ class URTesollo(Robot):
             robot_joints, velocity, acceleration, dt, lookahead_time, gain
         )
         if self._use_gripper:
-            gripper_pos = int(joint_state[-1] * 60) # Tesollo # CHANGE to corresponding gripper
+            gripper_pos = joint_state[-1] # Tesollo # CHANGE to corresponding gripper
             self.gripper.move(gripper_pos) # Tesollo # CHANGE to corresponding gripper
         self.robot.waitPeriod(t_start)
 
@@ -120,18 +120,24 @@ class URTesollo(Robot):
             return self.gripper.get_sensor_values()
         else:
             return None
+        
+    def get_current_values(self):
+        if self._use_gripper:
+            return self.gripper.get_current_values()
+        else:
+            return None
 
     def get_observations(self) -> Dict[str, np.ndarray]:
         joints = self.get_joint_state()
-        pos_quat = np.zeros(7)
         gripper_pos = np.array([joints[-1]])
         fingertip_sensor = self.get_finger_sensor()
+        current_values = self.get_current_values()
         return {
             "joint_positions": joints,
             "joint_velocities": joints,
-            "ee_pos_quat": pos_quat,
             "gripper_position": gripper_pos,
             "fingertip_sensor": fingertip_sensor,
+            "current": current_values,
         }
 
 class URInspire(Robot):

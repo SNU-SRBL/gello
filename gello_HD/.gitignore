@@ -15,6 +15,7 @@
 *wandb*
 *wandb_logs*
 outputs/*
+/rawdata/*
 
 # python
 *__pycache__

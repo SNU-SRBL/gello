@@ -96,7 +96,7 @@ class SRBL_Tesollo_gripper:
 
     def get_current_position(self):
         data = self.gripper.get_gripper_data()
-        pos = float(data.joint[self.joint_number])
+        pos = float(data.joint[self.joint_number - 1])
         pos = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, pos))
         pos = (pos - SRBL_TESOLLO_FINGER_LOWER_LIMIT) / (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) # normalize to [0, 1]
         return pos
@@ -109,7 +109,13 @@ class SRBL_Tesollo_gripper:
 
     def get_sensor_values(self):
         data = self.gripper.get_fingertip_sensor_data() # [TODO] Need to confirm the data format
-        lower_idx = 4 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
-        upper_idx = 4 * SRBL_TESOLLO_FINGER_NUMBER
+        lower_idx = 6 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
+        upper_idx = 6 * SRBL_TESOLLO_FINGER_NUMBER
         sensor = data.forceTorque[lower_idx:upper_idx]
         return sensor
+    
+    def get_current_values(self):
+        data = self.gripper.get_gripper_data()
+        current = data.current[self.joint_number - 1]
+        current /= 1000.0
+        return current
