@@ -39,8 +39,7 @@ The expected USB device assignments are:
 | Device        | Port           | Notes                               |
 | ------------- | -------------- | ----------------------------------- |
 | **GELLO**     | `/dev/ttyUSB0` | U2D2 controller for Dynamixels      |
-| **Gripper**   | `/dev/ttyUSB1` | Tesollo or Inspire Gripper          |
-| **FT Sensor** | `/dev/ttyUSB2` | Robotous 6-axis Force-Torque sensor |
+| **Gripper**   | `/dev/ttyUSB1` | Inspire Gripper                     |
 
 Expected output (example):
 
@@ -53,7 +52,9 @@ Use this path in the `--port` argument below.
 
 ## ⚙️ Software Setup
 
-### 1. Conda Environment & Python Path
+### 1. Environment Setup
+
+#### (1) Conda Environment & Python Path
 
 Activate your conda environment:
 
@@ -64,8 +65,18 @@ conda activate <your-conda-env>
 Add the current directory to the `PYTHONPATH`:
 
 ```bash
-cd gello/gello_ft/
+cd gello/gello_HD/
 export PYTHONPATH="$PYTHONPATH:$(pwd)"
+```
+
+---
+
+#### (2) (For Tesollo DG) Install dgsdk
+
+```bash
+# This part need confirmation in a clean environment
+cd gello/robots/delto_py/
+pip install -e .
 ```
 
 ---
@@ -82,11 +93,12 @@ Or in radians: `[0, -1.57, 1.57, -1.57, -1.57, 0]`
 
 ---
 
-### 3. Run GELLO with FT Sensor
+### 3. Run GELLO
 
 #### (1) Update Offset Before Use (Every Time)
 
 ```bash
+cd gello/gello_ft/
 python scripts/gello_get_offset.py \
     --start-joints 0 -1.57 1.57 -1.57 -1.57 0 \
     --joint-signs 1 1 -1 1 1 1 \
