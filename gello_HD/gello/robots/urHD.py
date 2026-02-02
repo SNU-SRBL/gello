@@ -146,6 +146,12 @@ class URTesollo(Robot):
             return self.gripper.get_position_values()
         else:
             return None
+        
+    def get_finger_values(self):
+        if self._use_gripper:
+            return self.gripper.get_observation_values()
+        else:
+            return None
 
     def get_observations(self) -> Dict[str, np.ndarray]:
         joints = self.get_joint_state()
@@ -155,6 +161,7 @@ class URTesollo(Robot):
         fingertip_sensor = self.get_finger_sensor_values()
         finger_current = self.get_finger_current_values()
         finger_velocity = self.get_finger_velocity_values()
+        # finger_data = self.get_finger_values() # position, velocity, current, sensor
         return {
             "joint_positions": joints,
             "finger_positions": finger_pos,

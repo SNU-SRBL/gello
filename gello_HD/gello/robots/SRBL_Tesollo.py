@@ -35,11 +35,14 @@ SRBL_TESOLLO_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
 SRBL_TESOLLO_FINGER_UPPER_LIMIT = 30.0 # Upper limit of the finger joint position
 
 SRBL_TESOLLO_FINGER_NUMBER = 2 # Number of the finger to control
+'''
+1: Thumb / 2: Index / 3: Middle / 4: Ring / 5: Little
+'''
 
 class SRBL_Tesollo_gripper:
     def __init__(self):
         self.error_flag = False
-        self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4
+        self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 # Joint number of the most tip
 
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
@@ -151,3 +154,28 @@ class SRBL_Tesollo_gripper:
         position.append(float(data.joint[self.joint_number - 2]))
         position.append(float(data.joint[self.joint_number - 3]))
         return position
+    
+    def get_observation_values(self):
+        '''
+        This method returns all the observation values from the gripper.
+        It is intended to ask the gripper for the data only once and get all the necessary information to avoid multiple communication calls and reduce latency.
+        
+        :param self: Default parameter for class methods
+        '''
+        data = self.gripper.get_gripper_data()
+        observation = {}
+        observation["position"] = []
+        observation["velocity"] = []
+        observation["current"] = []
+
+        # Iterate over the finger joints
+        # Position, Velocity, Current
+        for i in range(self.joint_number - 3, self.joint_number):
+            observation["position"].append(float(data.joint[i]))
+            observation["velocity"].append(float(data.velocity[i]))
+            observation["current"].append(float(data.current[i]) / 1000.0) # convert mA to A
+        
+        # Fingertip Sensor
+        observation["sensor"] = self.get_sensor_values()
+
+        return observation
