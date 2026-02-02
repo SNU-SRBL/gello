@@ -105,20 +105,33 @@ class SRBL_Tesollo_gripper:
             raise RuntimeError("Failed to initialize the gripper.")
         
         if self.init_pos:
-            self.initialize_finger_position()
+            self.SRBL_initialize()
         
     def __del__(self):
         self.gripper.stop()
         self.gripper.disconnect()
 
-    def initialize_finger_position(self):
+    def SRBL_initialize(self):
         '''
-        TODO : Initialize the finger position to a certain state.
-        Current target is to close the gripper fully except for the desired finger.
-        
-        :param self: Description
+        Initialize the Tesollo gripper
+        - Move to initial state
+        - Set motion time for gello control
         '''
-        pass
+        init_time = 2000
+        move_time = 30 # ms
+
+        # Move to initial position
+        self.gripper.set_motion_time_all_equal(init_time)
+        thumb_init = [0.0, 0.0, 90.0, 0.0]
+        index_init = [0.0, 0.0, 0.0, 0.0]
+        middle_init = [0.0, 0.0, 90.0, 90.0]
+        ring_init = [0.0, 0.0, 90.0, 90.0]
+        little_init = [0.0, 0.0, 90.0, 90.0]
+        init_pos = thumb_init + index_init + middle_init + ring_init + little_init
+        self.gripper.move_joint_all(init_pos)
+
+        # Set shorter time length for gello control
+        self.gripper.set_motion_time_all_equal(move_time)
 
     def get_current_position(self):
         data = self.gripper.get_gripper_data()
@@ -130,12 +143,15 @@ class SRBL_Tesollo_gripper:
     def move(self, target):
         joint_target = target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
         joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, joint_target))
-        self.gripper.move_joint(joint_target, self.joint_number)
-        self.gripper.move_joint(joint_target, self.joint_number - 1)
-        self.gripper.move_joint(joint_target, self.joint_number - 2)
-        """
-        self.gripper.move_joint_finger(SR)
-        """
+
+        SRBL_type = 1
+        if SRBL_type == 0:
+            self.gripper.move_joint(joint_target, self.joint_number)
+            self.gripper.move_joint(joint_target, self.joint_number - 1)
+            self.gripper.move_joint(joint_target, self.joint_number - 2)
+        elif SRBL_type == 1:
+            joint_targets = [0.0, joint_target, joint_target, joint_target]
+            self.gripper.move_joint_finger(SRBL_TESOLLO_FINGER_NUMBER, joint_targets)
         return
 
     def get_sensor_values(self):
@@ -184,8 +200,7 @@ class SRBL_Tesollo_gripper:
         observation["velocity"] = []
         observation["current"] = []
 
-        # Iterate over the finger joints
-        # Position, Velocity, Current
+        # Iterate over the finger joints - Position, Velocity, Current
         for i in range(self.joint_number - 3, self.joint_number):
             observation["position"].append(float(data.joint[i]))
             observation["velocity"].append(float(data.velocity[i]))

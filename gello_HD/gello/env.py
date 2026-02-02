@@ -79,6 +79,7 @@ class RobotEnv:
         assert "joint_positions" in robot_obs
         observations["joint_positions"] = robot_obs["joint_positions"]
         observations["finger_positions"] = robot_obs["finger_positions"]
+        observations["ee_pose"] = robot_obs["ee_pose"]
         observations["robot_velocity"] = robot_obs["robot_velocity"]
         observations["robot_current"] = robot_obs["robot_current"]
         observations["fingertip_sensor"] = robot_obs["fingertip_sensor"]

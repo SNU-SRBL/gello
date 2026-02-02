@@ -122,6 +122,10 @@ class URTesollo(Robot):
     def get_robot_current(self):
         robot_current = self.r_inter.getActualCurrent()
         return robot_current
+    
+    def get_robot_ee_pose(self):
+        robot_ee_pose = self.r_inter.getActualTCPPose()
+        return robot_ee_pose
 
     def get_finger_sensor_values(self):
         if self._use_gripper:
@@ -155,15 +159,26 @@ class URTesollo(Robot):
 
     def get_observations(self) -> Dict[str, np.ndarray]:
         joints = self.get_joint_state()
-        finger_pos = self.get_finger_position_values()
         robot_velocity = self.get_joint_velocity()
         robot_current = self.get_robot_current()
-        fingertip_sensor = self.get_finger_sensor_values()
-        finger_current = self.get_finger_current_values()
-        finger_velocity = self.get_finger_velocity_values()
+        robot_ee = self.get_robot_ee_pose()
+        if True:
+            finger_pos = self.get_finger_position_values()
+            fingertip_sensor = self.get_finger_sensor_values()
+            finger_current = self.get_finger_current_values()
+            finger_velocity = self.get_finger_velocity_values()
+        else:
+            # Code for calling the data from the gripper once. Not tested yet.
+            # Currently the approach above doesn't seem to cause too much delay.
+            finger_data = self. get_finger_values()
+            finger_pos = finger_data["position"]
+            finger_velocity = finger_data["velocity"]
+            finger_current = finger_data["current"]
+            fingertip_sensor = finger_data["sensor"]
         # finger_data = self.get_finger_values() # position, velocity, current, sensor
         return {
             "joint_positions": joints,
+            "ee_pose": robot_ee,
             "finger_positions": finger_pos,
             "robot_velocity": robot_velocity,
             "robot_current": robot_current,
