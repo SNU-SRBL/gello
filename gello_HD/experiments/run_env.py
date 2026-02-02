@@ -69,7 +69,7 @@ def main(args):
             usb_ports = glob.glob("/dev/serial/by-id/*")
             print(f"Found {len(usb_ports)} ports")
             if len(usb_ports) > 0:
-                gello_port = usb_ports[0] # Modify for the gello port
+                gello_port = usb_ports[0] # Modify for the gello port, assuming only the gello is connected by USB. If there are others, we may need to modify this part. Maybe we can try using -1 index if gello is always the last in the list. We connect gello first, but the list seems to be ordered in reverse.
                 print(f"using port {gello_port}")
             else:
                 raise ValueError(

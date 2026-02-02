@@ -115,29 +115,54 @@ class URTesollo(Robot):
             self._free_drive = False
             self.robot.endFreedriveMode()
 
-    def get_finger_sensor(self):
+    def get_joint_velocity(self):
+        robot_joint_velocity = self.r_inter.getActualQd()
+        return robot_joint_velocity
+
+    def get_robot_current(self):
+        robot_current = self.r_inter.getActualCurrent()
+        return robot_current
+
+    def get_finger_sensor_values(self):
         if self._use_gripper:
             return self.gripper.get_sensor_values()
         else:
             return None
         
-    def get_current_values(self):
+    def get_finger_current_values(self):
         if self._use_gripper:
             return self.gripper.get_current_values()
+        else:
+            return None
+        
+    def get_finger_velocity_values(self):
+        if self._use_gripper:
+            return self.gripper.get_velocity_values()
+        else:
+            return None
+    
+    def get_finger_position_values(self):
+        if self._use_gripper:
+            return self.gripper.get_position_values()
         else:
             return None
 
     def get_observations(self) -> Dict[str, np.ndarray]:
         joints = self.get_joint_state()
-        gripper_pos = np.array([joints[-1]])
-        fingertip_sensor = self.get_finger_sensor()
-        current_values = self.get_current_values()
+        finger_pos = self.get_finger_position_values()
+        robot_velocity = self.get_joint_velocity()
+        robot_current = self.get_robot_current()
+        fingertip_sensor = self.get_finger_sensor_values()
+        finger_current = self.get_finger_current_values()
+        finger_velocity = self.get_finger_velocity_values()
         return {
             "joint_positions": joints,
-            "joint_velocities": joints,
-            "gripper_position": gripper_pos,
+            "finger_positions": finger_pos,
+            "robot_velocity": robot_velocity,
+            "robot_current": robot_current,
             "fingertip_sensor": fingertip_sensor,
-            "current": current_values,
+            "finger_current": finger_current, # Maybe can combine with the robot values, but not sure of data type compatibility
+            "finger_velocity": finger_velocity,
         }
 
 class URInspire(Robot):

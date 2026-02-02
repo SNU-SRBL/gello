@@ -124,6 +124,7 @@ python experiments/launch_nodes.py --robot urI --robot_ip=192.168.10.2
 ```
 
 ```bash
+# May need to change the index for the port list depending on the number and order of USB devices connected.
 python experiments/run_env.py --agent=gello --use_save_interface
 ```
 

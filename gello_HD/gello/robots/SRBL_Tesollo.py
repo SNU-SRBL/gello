@@ -79,7 +79,7 @@ class SRBL_Tesollo_gripper:
             joint_count=20,
             finger_count=5,
             moving_inpose=0.5,
-            received_data_type=[1, 2, 0, 0, 5, 0],
+            received_data_type=[1, 2, 0, 4, 5, 0], # Check types.py
         )
         self.gripper_option = self.gripper.set_gripper_option(self.gripper_setting)
         if self.gripper_option != DGResult.NONE:
@@ -124,10 +124,30 @@ class SRBL_Tesollo_gripper:
         lower_idx = 6 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
         upper_idx = 6 * SRBL_TESOLLO_FINGER_NUMBER
         sensor = data.forceTorque[lower_idx:upper_idx] # elements are float type
+        # force in 0.1N, torque in 1mNm
         return sensor
     
     def get_current_values(self):
         data = self.gripper.get_gripper_data()
-        current = float(data.current[self.joint_number - 1])
-        current /= 1000.0
+        current = []
+        current.append(float(data.current[self.joint_number - 1]) / 1000.0) # convert mA to A
+        current.append(float(data.current[self.joint_number - 2]) / 1000.0) # convert mA to A
+        current.append(float(data.current[self.joint_number - 3]) / 1000.0) # convert mA to A
         return current
+
+    def get_velocity_values(self):
+        data = self.gripper.get_gripper_data()
+        velocity = []
+        velocity.append(float(data.velocity[self.joint_number - 1]))
+        velocity.append(float(data.velocity[self.joint_number - 2]))
+        velocity.append(float(data.velocity[self.joint_number - 3]))
+        # 1 RPM
+        return velocity
+    
+    def get_position_values(self):
+        data = self.gripper.get_gripper_data()
+        position = []
+        position.append(float(data.joint[self.joint_number - 1])) # 0.1 degree?
+        position.append(float(data.joint[self.joint_number - 2]))
+        position.append(float(data.joint[self.joint_number - 3]))
+        return position

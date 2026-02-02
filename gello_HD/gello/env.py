@@ -70,21 +70,20 @@ class RobotEnv:
             obs: observation from the environment.
         """
         observations = {}
-        for name, camera in self._camera_dict.items():
-            image, depth = camera.read()
-            observations[f"{name}_rgb"] = image
-            observations[f"{name}_depth"] = depth
+        # for name, camera in self._camera_dict.items():
+        #     image, depth = camera.read()
+        #     observations[f"{name}_rgb"] = image
+        #     observations[f"{name}_depth"] = depth
 
         robot_obs = self._robot.get_observations()
         assert "joint_positions" in robot_obs
-        assert "joint_velocities" in robot_obs
-        # assert "ee_pos_quat" in robot_obs
         observations["joint_positions"] = robot_obs["joint_positions"]
-        observations["joint_velocities"] = robot_obs["joint_velocities"]
-        # observations["ee_pos_quat"] = robot_obs["ee_pos_quat"]
-        observations["gripper_position"] = robot_obs["gripper_position"]
+        observations["finger_positions"] = robot_obs["finger_positions"]
+        observations["robot_velocity"] = robot_obs["robot_velocity"]
+        observations["robot_current"] = robot_obs["robot_current"]
         observations["fingertip_sensor"] = robot_obs["fingertip_sensor"]
-        observations["current"] = robot_obs["current"]
+        observations["finger_current"] = robot_obs["finger_current"]
+        observations["finger_velocity"] = robot_obs["finger_velocity"]
         return observations
 
 
