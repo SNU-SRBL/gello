@@ -40,13 +40,14 @@ SRBL_TESOLLO_FINGER_NUMBER = 2 # Number of the finger to control
 '''
 
 class SRBL_Tesollo_gripper:
-    def __init__(self):
+    def __init__(self, init_pos: bool = True):
+        self.init_pos = init_pos
         self.error_flag = False
         self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 # Joint number of the most tip
 
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
-            ip="169.254.186.73",
+            ip="169.254.186.73", # Set the computer IP to 169.254.286.x where x is any number between 2 and 255 except 73. Used 10
             port=502,
             control_mode=ControlMode.OPERATOR,  # OPERATOR 모드
             communication_mode=CommunicationMode.ETHERNET,
@@ -103,9 +104,21 @@ class SRBL_Tesollo_gripper:
         if self.error_flag:
             raise RuntimeError("Failed to initialize the gripper.")
         
+        if self.init_pos:
+            self.initialize_finger_position()
+        
     def __del__(self):
         self.gripper.stop()
         self.gripper.disconnect()
+
+    def initialize_finger_position(self):
+        '''
+        TODO : Initialize the finger position to a certain state.
+        Current target is to close the gripper fully except for the desired finger.
+        
+        :param self: Description
+        '''
+        pass
 
     def get_current_position(self):
         data = self.gripper.get_gripper_data()

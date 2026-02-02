@@ -1,6 +1,6 @@
-# GELLO with Force-Torque Sensor (`gello_ft`)
+# GELLO for HD project (`gello_HD`)
 
-This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, extended with 6-axis force-torque sensing capabilities. It integrates the following hardware:
+This folder contains a customized version of the [GELLO](https://wuphilipp.github.io/gello_site/) system developed by the SRBL lab, modified for use with 2 specific commercial grippers (Tesollo DG-5F, Inspire RH56F). It integrates the following hardware:
 
 * UR5e Robot Arm
 * Tesollo DG-5F or Inspire RH56F1
