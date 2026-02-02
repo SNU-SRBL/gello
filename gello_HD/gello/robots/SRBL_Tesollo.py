@@ -133,6 +133,9 @@ class SRBL_Tesollo_gripper:
         self.gripper.move_joint(joint_target, self.joint_number)
         self.gripper.move_joint(joint_target, self.joint_number - 1)
         self.gripper.move_joint(joint_target, self.joint_number - 2)
+        """
+        self.gripper.move_joint_finger(SR)
+        """
         return
 
     def get_sensor_values(self):
