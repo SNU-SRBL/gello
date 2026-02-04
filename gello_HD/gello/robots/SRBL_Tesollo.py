@@ -118,14 +118,14 @@ class SRBL_Tesollo_gripper:
         - Set motion time for gello control
         '''
         init_time = 3000
-        move_time = 30 # ms
+        move_time = 50 # ms
 
         # Move to initial position
         self.gripper.set_motion_time_all_equal(init_time)
         thumb_init = [0.0, 0.0, -90.0, 0.0]
         index_init = [0.0, 0.0, 0.0, 0.0]
-        middle_init = [0.0, 0.0, 90.0, 90.0]
-        ring_init = [0.0, 0.0, 90.0, 90.0]
+        middle_init = [0.0, 90.0, 90.0, 0.0]
+        ring_init = [0.0, 90.0, 90.0, 0.0]
         little_init = [0.0, 0.0, 90.0, 90.0]
         init_pos = thumb_init + index_init + middle_init + ring_init + little_init
         self.gripper.move_joint_all(init_pos)
