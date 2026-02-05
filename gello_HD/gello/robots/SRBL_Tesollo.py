@@ -187,6 +187,11 @@ class SRBL_Tesollo_gripper:
         position.append(float(data.joint[self.joint_number - 3]))
         return position
     
+    def get_tcp(self):
+        # The TCP pose function within the Tesollo SDK seems to be at its experimental stage.
+        # The manual states that it is designed for use in the 3F grippers, and doesn't state anything about the 5F grippers.
+        return self.gripper.get_current_tcp_pose()
+
     def get_observation_values(self):
         '''
         This method returns all the observation values from the gripper.
@@ -208,5 +213,8 @@ class SRBL_Tesollo_gripper:
         
         # Fingertip Sensor
         observation["sensor"] = self.get_sensor_values()
+        observation["tcp"] = self.get_tcp()
 
         return observation
+    
+    

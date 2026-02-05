@@ -85,6 +85,7 @@ class RobotEnv:
         observations["fingertip_sensor"] = robot_obs["fingertip_sensor"]
         observations["finger_current"] = robot_obs["finger_current"]
         observations["finger_velocity"] = robot_obs["finger_velocity"]
+        observations["finger_tcp"] = robot_obs["finger_tcp"]
         return observations
 
 

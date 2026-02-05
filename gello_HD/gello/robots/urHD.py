@@ -162,7 +162,7 @@ class URTesollo(Robot):
         robot_velocity = self.get_joint_velocity()
         robot_current = self.get_robot_current()
         robot_ee = self.get_robot_ee_pose()
-        if True:
+        if False:
             finger_pos = self.get_finger_position_values()
             fingertip_sensor = self.get_finger_sensor_values()
             finger_current = self.get_finger_current_values()
@@ -175,6 +175,7 @@ class URTesollo(Robot):
             finger_velocity = finger_data["velocity"]
             finger_current = finger_data["current"]
             fingertip_sensor = finger_data["sensor"]
+            finger_tcp = finger_data["tcp"]
         # finger_data = self.get_finger_values() # position, velocity, current, sensor
         return {
             "joint_positions": joints,
@@ -185,6 +186,7 @@ class URTesollo(Robot):
             "fingertip_sensor": fingertip_sensor,
             "finger_current": finger_current, # Maybe can combine with the robot values, but not sure of data type compatibility
             "finger_velocity": finger_velocity,
+            "finger_tcp": finger_tcp,
         }
 
 class URInspire(Robot):
