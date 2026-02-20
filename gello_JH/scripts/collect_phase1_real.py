@@ -21,6 +21,7 @@ import sys
 import time
 import select
 import enum
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -32,7 +33,7 @@ import numpy as np
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 sys.path.insert(
-    0, str(_PROJECT_ROOT / "gello_HD" / "gello" / "robots" / "delto_py" / "src")
+    0, str(_PROJECT_ROOT.parent / "gello_HD" / "gello" / "robots" / "delto_py" / "src")
 )
 
 from dgsdk import (
@@ -54,6 +55,10 @@ NUM_JOINTS = 20
 NUM_FINGERS = 5
 JOINTS_PER_FINGER = 4
 JOINT_RANGE_DEG = (0.0, 30.0)
+
+# Abduction joint is index 0 within each finger: [0, 4, 8, 12, 16]
+ABDUCTION_JOINT_INDICES = [i * JOINTS_PER_FINGER for i in range(NUM_FINGERS)]
+ABDUCTION_FIXED_DEG = 0.0  # Fixed abduction angle (degrees)
 
 FINGER_NAMES = ["thumb", "index", "middle", "ring", "pinky"]
 FINGER_JOINT_SLICES = {
@@ -103,6 +108,12 @@ class TesolloPhase1Collector:
         self.args = args
         self.gripper: Optional[DGGripper] = None
         self.collected_samples: list[dict] = []
+
+        # Servo thread: move_servo_joint 20Hz — trajectory 리셋 없이 부드러운 실시간 제어
+        self._servo_running = False
+        self._servo_thread: Optional[threading.Thread] = None
+        self._servo_lock = threading.Lock()
+        self._servo_rate_hz = 20  # 20Hz (50ms): move_servo_joint는 trajectory 없이 PD 실시간 업데이트
         self._current_q_cmd_deg: Optional[np.ndarray] = None
 
         # Thresholds
@@ -160,6 +171,10 @@ class TesolloPhase1Collector:
             moving_inpose=0.5,
             received_data_type=[1, 2, 0, 4, 5, 0],  # JOINT, CURRENT, VELOCITY, FT
         )
+        # jointInpose 기본값이 0° → targetArrived 절대 True 안 됨
+        ## 5° 안으로 들어오면 True로 설정
+        for i in range(NUM_JOINTS):
+            gripper_setting.jointInpose[i] = 5.0
         result = self.gripper.set_gripper_option(gripper_setting)
         if result != DGResult.NONE:
             raise RuntimeError(f"Gripper option failed: {result.name}")
@@ -171,14 +186,22 @@ class TesolloPhase1Collector:
             raise RuntimeError(f"System start failed: {result.name}")
 
         time.sleep(0.5)
+        self.start_hold()  # servo 먼저 시작
+        time.sleep(0.5)    # 20Hz 서보로 안정화 대기
+        self.gripper.set_fingertip_data_zero()  # 안정된 상태에서 영점
         print("[OK] Tesollo DG5F initialized (DEVELOPER mode, all 20 joints)")
 
     def disconnect(self) -> None:
-        """Safe shutdown: neutral position → stop → disconnect."""
+        """Safe shutdown: stop servo thread → neutral position → stop → disconnect."""
+        self._servo_running = False
+        if self._servo_thread is not None:
+            self._servo_thread.join(timeout=1.0)
+            self._servo_thread = None
+
         if self.gripper is None:
             return
         try:
-            neutral = [15.0] * NUM_JOINTS
+            neutral = [0.0] * NUM_JOINTS
             self.gripper.move_joint_all(neutral)
             print("[INFO] Moving to neutral position...")
             time.sleep(2.0)
@@ -281,13 +304,39 @@ class TesolloPhase1Collector:
     # Motion
     # =====================================================================
 
+    def _servo_loop(self) -> None:
+        """20Hz로 move_servo_joint 실시간 전송 — trajectory 리셋 없이 부드러운 위치 유지."""
+        interval = 1.0 / self._servo_rate_hz
+        while self._servo_running:
+            t0 = time.time()
+            with self._servo_lock:
+                q = self._current_q_cmd_deg
+            if q is not None and self.gripper is not None:
+                try:
+                    self.gripper.move_servo_joint(q.tolist())
+                except Exception:
+                    pass
+            elapsed = time.time() - t0
+            if elapsed < interval:
+                time.sleep(interval - elapsed)
+
+    def start_hold(self) -> None:
+        """servo thread가 꺼져 있으면 시작."""
+        if not self._servo_running:
+            self._servo_running = True
+            self._servo_thread = threading.Thread(target=self._servo_loop, daemon=True)
+            self._servo_thread.start()
+
     def send_q_cmd(self, q_cmd_deg: np.ndarray) -> None:
-        """Send position command with safety clamping."""
+        """타겟 업데이트 → servo thread가 20Hz로 move_servo_joint 전송."""
         q_clamped = np.clip(q_cmd_deg, JOINT_RANGE_DEG[0], JOINT_RANGE_DEG[1])
         if not np.allclose(q_clamped, q_cmd_deg):
             print(f"  [WARN] q_cmd clamped to [{JOINT_RANGE_DEG[0]}, {JOINT_RANGE_DEG[1]}] deg")
-        self.gripper.move_joint_all(q_clamped.tolist())
-        self._current_q_cmd_deg = q_clamped.copy()
+        q_clamped[ABDUCTION_JOINT_INDICES] = ABDUCTION_FIXED_DEG
+        with self._servo_lock:
+            self._current_q_cmd_deg = q_clamped.copy()
+        self.start_hold()  # servo가 꺼져 있으면 시작
+        self.gripper.move_servo_joint(q_clamped.tolist())  # 즉시 한 번 전송
 
     def wait_for_arrival(self, timeout: float = 5.0) -> bool:
         """Wait until targetArrived or timeout."""
@@ -443,6 +492,7 @@ class TesolloPhase1Collector:
         # Move to position
         self.send_q_cmd(q_cmd_deg)
         self.wait_for_arrival(timeout=5.0)
+        self.start_hold()
         time.sleep(self.settle_time)
 
         # Zero FT sensors at this position (gravity compensation)
@@ -535,6 +585,7 @@ class TesolloPhase1Collector:
                 print("  Restoring q_cmd position...")
                 self.send_q_cmd(q_cmd_deg)
                 self.wait_for_arrival(timeout=3.0)
+                self.start_hold()
                 time.sleep(0.5)
                 # Re-zero FT sensors (position changed, gravity offset may differ)
                 self.zero_ft_sensors()
@@ -619,9 +670,10 @@ class TesolloPhase1Collector:
         print(f"{'=' * 60}\n")
 
         # Move to neutral
-        neutral = np.full(NUM_JOINTS, 15.0)
+        neutral = np.full(NUM_JOINTS, 0.0)
         self.send_q_cmd(neutral)
         self.wait_for_arrival(timeout=5.0)
+        self.start_hold()
         time.sleep(1.0)
         self.zero_ft_sensors()
         print("FT sensors zeroed at neutral position\n")
@@ -633,7 +685,7 @@ class TesolloPhase1Collector:
 
                 # Joint positions
                 q_deg = state["q_actual_rad"] / DEG2RAD
-                print(f"\rJoints (deg): [{', '.join(f'{v:5.1f}' for v in q_deg)}]")
+                print(f"Joints (deg): [{', '.join(f'{v:5.1f}' for v in q_deg)}]")
 
                 # Currents
                 I_mA = state["I_motor_A"] / MA_TO_A  # back to mA for display
@@ -649,13 +701,13 @@ class TesolloPhase1Collector:
                           f"T=[{tx:7.4f}, {ty:7.4f}, {tz:7.4f}]Nm  |F|={mag:.3f}N")
 
                 print(f"  targetArrived: {state['target_arrived']}")
-                # Move cursor up for overwrite
-                print(f"\033[{NUM_FINGERS + 4}A", end="")
+                # Move cursor up for overwrite (8 lines: Joints + Current + 5 FT + targetArrived)
+                print(f"\033[{NUM_FINGERS + 3}A", end="", flush=True)
 
                 time.sleep(0.1)
         except KeyboardInterrupt:
-            # Move cursor down to avoid overwriting
-            print(f"\n" * (NUM_FINGERS + 5))
+            # Move cursor down past the display block to avoid overwriting
+            print(f"\n" * (NUM_FINGERS + 4))
             print("[OK] Dry run ended")
 
     # =====================================================================
@@ -735,8 +787,8 @@ Examples:
 
     # Output
     parser.add_argument(
-        "--output", type=str, default="data/real_data/phase1_contact.npz",
-        help="Output .npz file path (default: data/real_data/phase1_contact.npz)",
+        "--output", type=str, default="data/Current_Torque/phase1_contact.npz",
+        help="Output .npz file path (default: data/Current_Torque/phase1_contact.npz)",
     )
 
     # Position generation
@@ -830,11 +882,12 @@ _output_path: Optional[str] = None
 
 
 def _signal_handler(signum, frame):
-    """Save partial data on interrupt."""
-    print("\n\n[INTERRUPT] Saving collected data...")
-    if _collector and _collector.collected_samples and _output_path:
-        emergency_path = _output_path.replace(".npz", "_partial.npz")
-        _collector.save_data(_collector.collected_samples, emergency_path)
+    """Save partial data on interrupt (skipped in dry_run mode)."""
+    if _collector and not _collector.args.dry_run:
+        print("\n\n[INTERRUPT] Saving collected data...")
+        if _collector.collected_samples and _output_path:
+            emergency_path = _output_path.replace(".npz", "_partial.npz")
+            _collector.save_data(_collector.collected_samples, emergency_path)
     if _collector:
         _collector.disconnect()
     sys.exit(0)
