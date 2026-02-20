@@ -1,0 +1,71 @@
+# Tesollo DG5F Hand Configuration
+
+hand:
+  name: "tesollo_dg5f"
+  num_fingers: 5
+  pads_per_finger: 7
+  total_sensors: 35
+
+  # USD asset path
+  usd_path: "/home/Isaac/workspace/HD/Tesollo/assets/dg5f_left_flattened.usd"
+
+  # Finger names
+  fingers:
+    - thumb
+    - index
+    - middle
+    - ring
+    - pinky
+
+  # Joint naming pattern
+  joint_prefix: "lj_dg"
+
+  # Pad joint naming pattern: pad_{pad_idx}_{finger}_joint
+  pad_joint_pattern: "pad_{pad_idx}_{finger}_joint"
+
+  # Finger segment naming: ll_dg_{finger_idx}_{segment_idx}
+  segment_pattern: "ll_dg_{finger_idx}_{segment_idx}"
+
+  # Fingertip segment indices (last segment of each finger)
+  fingertip_segments:
+    thumb: "ll_dg_1_4"
+    index: "ll_dg_2_4"
+    middle: "ll_dg_3_4"
+    ring: "ll_dg_4_4"
+    pinky: "ll_dg_5_4"
+
+# F/T Sensor Configuration
+ft_sensor:
+  # Coordinate transformation for each finger
+  thumb_transform:
+    # Negate X and Y
+    fx: -1
+    fy: -1
+    fz: 1
+    tx: -1
+    ty: -1
+    tz: 1
+
+  other_transform:
+    # Permute: Y→X, Z→Y, X→Z
+    fx_from: "fy"
+    fy_from: "fz"
+    fz_from: "fx"
+    tx_from: "ty"
+    ty_from: "tz"
+    tz_from: "tx"
+
+# Physics properties (initial values)
+physics:
+  static_friction: 1.0
+  dynamic_friction: 0.8
+  restitution: 0.0
+  pad_mass: 0.001  # kg
+
+# Actuator configuration
+actuators:
+  stiffness: 100.0  # N·m/rad (to be calibrated)
+  damping: 10.0     # N·m·s/rad (to be calibrated)
+  friction: 0.1     # N·m (to be calibrated)
+  effort_limit: 10.0  # N·m
+  velocity_limit: 10.0  # rad/s

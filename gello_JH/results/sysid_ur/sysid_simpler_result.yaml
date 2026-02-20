@@ -1,0 +1,43 @@
+method: simpler
+loss_type: ee_pose
+joint_names:
+- shoulder_pan_joint
+- shoulder_lift_joint
+- elbow_joint
+- wrist_1_joint
+- wrist_2_joint
+- wrist_3_joint
+parameters:
+  stiffness:
+  - 332.16514234928985
+  - 81887.5100114062
+  - 81585.50782778549
+  - 10947.637166142093
+  - 53370.78089257209
+  - 83602.30300048868
+  damping:
+  - 36.081415219765155
+  - 164.97438178078923
+  - 246.24876880222232
+  - 216.2548763856393
+  - 12.447350541048452
+  - 391.8193581169853
+final_loss:
+  L_transl: 4.077046659515343e-06
+  L_rot: 0.012254878651283423
+  L_total: 0.012258955697942938
+optimization:
+  num_rounds: 3
+  trials_per_round: 100
+  stiffness_bounds:
+  - 286.5
+  - 85944.0
+  damping_bounds:
+  - 0.573
+  - 572.96
+  total_evaluations: 300
+trajectory_info:
+  dataset: /home/Isaac/workspace/HD/Real2Sim/data/lerobot/HD_0204
+  max_time_used: 20.0
+  frames_used: 658
+timestamp: '2026-02-10T22:34:49.076683'

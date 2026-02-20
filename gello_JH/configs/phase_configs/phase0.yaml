@@ -1,0 +1,50 @@
+# Phase 0: Robot System Identification Configuration
+
+phase: 0
+name: "Robot System Identification"
+description: "Identify joint dynamics parameters (stiffness, damping, friction)"
+
+# Environment settings
+environment:
+  episode_length_s: 60.0
+  control_mode: "torque"  # torque or position
+  settle_steps: 100
+
+# Optimization settings
+optimization:
+  method: "gradient_descent"  # gradient_descent, grid_search, bayesian
+  num_epochs: 100
+  learning_rate: 0.01
+  patience: 10
+  min_delta: 1.0e-6
+
+# Parameter initialization
+initial_params:
+  joint_stiffness: 100.0
+  joint_damping: 10.0
+  joint_friction: 0.1
+
+# Parameter bounds
+bounds:
+  joint_stiffness:
+    min: 1.0
+    max: 1000.0
+    log_scale: true
+  joint_damping:
+    min: 0.1
+    max: 100.0
+    log_scale: true
+  joint_friction:
+    min: 0.0
+    max: 1.0
+    log_scale: false
+
+# Loss function
+loss:
+  position_weight: 1.0
+  velocity_weight: 0.1
+
+# Data
+data:
+  trajectory_dir: "data/real_data/phase0_trajectories"
+  output_dir: "results/phase0"

@@ -1,17 +1,24 @@
-# keep in alphabetical order
-dm_control
-Pillow
-pygame
-pyspacemouse
-PyQt6
-pyquaternion
-pyrealsense2
-pure-python-adb
-quaternion
-tyro
-ur-rtde
-zmq
-xarm
-xarm-python-sdk
-numpy-quaternion
-termcolor
+# Real2Sim Calibration Framework Dependencies
+
+# Core
+numpy>=1.21.0
+torch>=2.0.0
+scipy>=1.9.0
+
+# Isaac Lab (installed separately)
+# isaaclab>=2.0.0
+
+# Optimization
+optuna>=3.0.0
+
+# Data storage
+h5py>=3.0.0
+pyyaml>=6.0.0
+
+# Analysis
+scikit-learn>=1.0.0
+matplotlib>=3.5.0
+
+# Optional: Advanced optimization
+# botorch>=0.8.0
+# gpytorch>=1.9.0

@@ -1,0 +1,20 @@
+<mujoco model="isacsim_test">
+  <compiler angle="radian"/>
+  <default>
+    <geom contype="1" conaffinity="1" group="2"/>
+  </default>
+  <asset>
+    <!-- Meshes -->
+    <mesh name="base" file="meshes/base.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <!-- Body Structure -->
+  <worldbody>
+    <!-- RH-P12-RN Base -->
+    <body name="rh_p12_rn_base" pos="0 0 0">
+      <inertial mass="0.236" pos="0 0 0.032" diaginertia="0.00017 0.00011 0.00017"/>
+      <geom mesh="base" rgba="0.5 0.5 0.5 1" type="mesh"/>
+    </body>
+  </worldbody>
+
+</mujoco>

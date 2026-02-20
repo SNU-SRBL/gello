@@ -1,0 +1,89 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_AO.png",
+            "source_hash": "d5dc97b27258232c1edad62af7c1f7f48a28e6de",
+            "target_url": "./SubUSDs/textures/simulation_env/work_bench_AO.png",
+            "target_hash": "ca32cb3546b80086148e824bb451dd92026efeca"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Albedo.png",
+            "source_hash": "78062293006b1a5aa3bc078da8aea244fe0930be",
+            "target_url": "./SubUSDs/textures/simulation_env/work_bench_Albedo.png",
+            "target_hash": "4c95595e4180a501828332b34fd9f8348ebba741"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Metallic.png",
+            "source_hash": "355f15da7adaf0bc725e412793bcd433c9607602",
+            "target_url": "./SubUSDs/textures/simulation_env/work_bench_Metallic.png",
+            "target_hash": "3c142dffb8362ce4cf3f5da305ed3c6edfb94c46"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Normal.png",
+            "source_hash": "ff6f64de1cf882bdb6e8649cd927104b8c4536f1",
+            "target_url": "./SubUSDs/textures/simulation_env/work_bench_Normal.png",
+            "target_hash": "56e3d6386d68c07c58993164a6ce5154ec6e7ff3"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Roughness.png",
+            "source_hash": "6a2c702dea1ced0cd8d2229a23984c684926d57f",
+            "target_url": "./SubUSDs/textures/simulation_env/work_bench_Roughness.png",
+            "target_hash": "c524593be92abbe9f50200690fd5fe9150447984"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_AO_1.png",
+            "source_hash": "12498acc1a0f1a78d4df19bde3c0968aae0e0167",
+            "target_url": "./SubUSDs/textures/work_bench/work_bench_AO_1.png",
+            "target_hash": "ca32cb3546b80086148e824bb451dd92026efeca"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Albedo_1.png",
+            "source_hash": "4c6c00d90902bfedcbcd7af58b985814b0444a8b",
+            "target_url": "./SubUSDs/textures/work_bench/work_bench_Albedo_1.png",
+            "target_hash": "225f63c285fd02014f962089478ef2c0b12dd4e0"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Metallic_1.png",
+            "source_hash": "23c084fc714f955ca0eb07a9bba3bf5fa898c8dc",
+            "target_url": "./SubUSDs/textures/work_bench/work_bench_Metallic_1.png",
+            "target_hash": "3c142dffb8362ce4cf3f5da305ed3c6edfb94c46"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Normal_1.png",
+            "source_hash": "53858f2458008da28e9662573adc089996368145",
+            "target_url": "./SubUSDs/textures/work_bench/work_bench_Normal_1.png",
+            "target_hash": "ad8c355aa3628b406a614dfdd168df33087661f7"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/work_bench_Roughness_1.png",
+            "source_hash": "4a4bbab8ca151e7e2fe944b87a3be87eb1263908",
+            "target_url": "./SubUSDs/textures/work_bench/work_bench_Roughness_1.png",
+            "target_hash": "da309a4954873309aefb8d6a556aaeae5285b19e"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/materials/Aluminum_Scratched.mdl",
+            "source_hash": "bbd3b98ddee2ddd671608f403bb389be9df858dd",
+            "target_url": "./SubUSDs/materials/Aluminum_Scratched.mdl",
+            "target_hash": "80c648b3dc41a3457d4fe6d75b1f96e340ed8892"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/metal_scratched_R_diff_G_scratchvar_B_dirt.jpg",
+            "source_hash": "adbb8ef89289c2e22350935992294e5491942ac7",
+            "target_url": "./SubUSDs/textures/metal_scratched_R_diff_G_scratchvar_B_dirt.jpg",
+            "target_hash": "137a39f0c51cae0925ca96da411eab1243197573"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/metal_scratched_R_scratch1_G_scratch2_B_scratch3.jpg",
+            "source_hash": "00cbc99da19d6b2301390824dbf561fc85c532fc",
+            "target_url": "./SubUSDs/textures/metal_scratched_R_scratch1_G_scratch2_B_scratch3.jpg",
+            "target_hash": "6229f31ba8824e2afd23e51a0da00f90cb1ddb53"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/Collected_World1/SubUSDs/textures/metal_scratched_scratch_norm.jpg",
+            "source_hash": "46982ab006117a5a9b968530da8886198b9c5d7e",
+            "target_url": "./SubUSDs/textures/metal_scratched_scratch_norm.jpg",
+            "target_hash": "0608dfd52dde2d189b7fcde97482d02ab14a837a"
+        }
+    ]
+}

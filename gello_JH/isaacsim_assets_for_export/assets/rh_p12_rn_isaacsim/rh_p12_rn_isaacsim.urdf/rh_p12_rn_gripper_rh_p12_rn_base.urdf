@@ -1,0 +1,16 @@
+<?xml version="0.0" ?>
+<robot name="rh_p12_rn_gripper">
+	<link name="rh_p12_rn_base">
+		<inertial>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.03200"/>
+			<mass value="0.23600"/>
+			<inertia ixx="0.00014" ixy="0" ixz="0" iyy="0.00013" iyz="0" izz="0.00003"/>
+		</inertial>
+		<collision>
+			<origin rpy="0.00000 -0.00000 0.00000" xyz="0.00000 0.00000 0.00000"/>
+			<geometry>
+				<box size="0.02000 0.03000 0.08000"/>
+			</geometry>
+		</collision>
+	</link>
+</robot>

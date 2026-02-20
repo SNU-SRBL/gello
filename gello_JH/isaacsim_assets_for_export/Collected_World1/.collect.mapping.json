@@ -1,0 +1,59 @@
+{
+    "version": "1.0",
+    "file_records": [
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/assets/Work_bench/textures/work_bench_AO.png",
+            "source_hash": "fc43c5777d78a017753c8b9f2e8aa10a1ea233e4",
+            "target_url": "./SubUSDs/textures/work_bench_AO.png",
+            "target_hash": "d5dc97b27258232c1edad62af7c1f7f48a28e6de"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/assets/Work_bench/textures/work_bench_Albedo.png",
+            "source_hash": "d751bb39420f794e4804408b9ef844921eeeffde",
+            "target_url": "./SubUSDs/textures/work_bench_Albedo.png",
+            "target_hash": "78062293006b1a5aa3bc078da8aea244fe0930be"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/assets/Work_bench/textures/work_bench_Metallic.png",
+            "source_hash": "b05ec10fc58559b9d09dc2aa866f92392ea97b42",
+            "target_url": "./SubUSDs/textures/work_bench_Metallic.png",
+            "target_hash": "355f15da7adaf0bc725e412793bcd433c9607602"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/assets/Work_bench/textures/work_bench_Normal.png",
+            "source_hash": "f62b912bde0b2aae4ce3015285d8051f00b7241b",
+            "target_url": "./SubUSDs/textures/work_bench_Normal.png",
+            "target_hash": "ff6f64de1cf882bdb6e8649cd927104b8c4536f1"
+        },
+        {
+            "source_url": "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/assets/Work_bench/textures/work_bench_Roughness.png",
+            "source_hash": "7a3755271ac5dd22ca4f390b2d37fcbcc121ca29",
+            "target_url": "./SubUSDs/textures/work_bench_Roughness.png",
+            "target_hash": "6a2c702dea1ced0cd8d2229a23984c684926d57f"
+        },
+        {
+            "source_url": "http://omniverse-content-production.s3.us-west-2.amazonaws.com/Materials/vMaterials_2/Metal/Aluminum_Scratched.mdl",
+            "source_hash": "a73bcba184f84f1b60cc952c07d5eb3833dbc149",
+            "target_url": "./SubUSDs/materials/Aluminum_Scratched.mdl",
+            "target_hash": "bbd3b98ddee2ddd671608f403bb389be9df858dd"
+        },
+        {
+            "source_url": "http://omniverse-content-production.s3.us-west-2.amazonaws.com/Materials/vMaterials_2/Metal/textures/metal_scratched_R_diff_G_scratchvar_B_dirt.jpg",
+            "source_hash": "b37cff03cadfaa728fec805d1589d9c9561cd845",
+            "target_url": "./SubUSDs/textures/metal_scratched_R_diff_G_scratchvar_B_dirt.jpg",
+            "target_hash": "adbb8ef89289c2e22350935992294e5491942ac7"
+        },
+        {
+            "source_url": "http://omniverse-content-production.s3.us-west-2.amazonaws.com/Materials/vMaterials_2/Metal/textures/metal_scratched_R_scratch1_G_scratch2_B_scratch3.jpg",
+            "source_hash": "68171489ff95e761d96e9743b166a34632c61fd4",
+            "target_url": "./SubUSDs/textures/metal_scratched_R_scratch1_G_scratch2_B_scratch3.jpg",
+            "target_hash": "00cbc99da19d6b2301390824dbf561fc85c532fc"
+        },
+        {
+            "source_url": "http://omniverse-content-production.s3.us-west-2.amazonaws.com/Materials/vMaterials_2/Metal/textures/metal_scratched_scratch_norm.jpg",
+            "source_hash": "a62a4c30df604203c37464de60968baa872bbfae",
+            "target_url": "./SubUSDs/textures/metal_scratched_scratch_norm.jpg",
+            "target_hash": "46982ab006117a5a9b968530da8886198b9c5d7e"
+        }
+    ]
+}

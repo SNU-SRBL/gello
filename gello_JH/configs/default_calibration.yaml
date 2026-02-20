@@ -1,0 +1,107 @@
+# Real2Sim Calibration - Default Configuration
+# Tesollo DG5F Hand + UR5e Arm
+
+general:
+  device: "cuda:0"
+  seed: 42
+  log_dir: "./logs"
+
+simulation:
+  dt: 0.00833  # 120 Hz physics
+  decimation: 4  # 30 Hz control
+  physx:
+    solver_type: 1  # TGS
+    max_position_iteration_count: 192
+    max_velocity_iteration_count: 1
+    enable_ccd: true
+    enable_stabilization: true
+    gpu_max_rigid_contact_count: 8388608  # 2^23
+    gpu_max_rigid_patch_count: 8388608
+    gpu_collision_stack_size: 268435456  # 2^28
+
+robot:
+  arm: "ur5e"
+  hand: "tesollo_dg5f"
+  hand_usd_path: "/home/Isaac/workspace/HD/Tesollo/assets/dg5f_left_flattened.usd"
+  arm_usd_path: "/home/Isaac/workspace/HD/Real2Sim/isaacsim_assets_for_export/ur5e/ur5e.usd"
+
+# Phase 0: Robot System Identification
+phase0:
+  num_epochs: 100
+  learning_rate: 0.01
+  patience: 10
+  min_delta: 1.0e-6
+
+  # Initial parameter values
+  initial_stiffness: 100.0
+  initial_damping: 10.0
+  initial_friction: 0.1
+
+  # Parameter bounds
+  stiffness_bounds: [1.0, 1000.0]
+  damping_bounds: [0.1, 100.0]
+  friction_bounds: [0.0, 1.0]
+
+  # Loss weights
+  position_weight: 1.0
+  velocity_weight: 0.1
+
+# Phase 1: Current-Torque Calibration
+phase1:
+  # Force magnitudes to test (N)
+  force_magnitudes: [1.0, 2.0, 3.0, 5.0, 7.0, 10.0]
+
+  # Force directions
+  force_directions:
+    normal: [0.0, 0.0, -1.0]
+    tangent_x: [1.0, 0.0, 0.0]
+    tangent_y: [0.0, 1.0, 0.0]
+
+  # Settling time after force application (seconds)
+  settling_time: 1.0
+
+  # Number of trials per condition
+  num_trials: 5
+
+  # Fingers to calibrate
+  fingers_to_calibrate: ["thumb", "index"]
+
+  # Minimum R² for valid calibration
+  r_squared_threshold: 0.9
+
+# Phase 2: Friction & Contact Calibration
+phase2:
+  # Slip test parameters
+  initial_grip_current: 0.5  # A
+  final_grip_current: 0.0    # A
+  current_ramp_duration: 10.0  # seconds
+
+  # Slip detection thresholds
+  slip_velocity_threshold: 0.001  # m/s
+  slip_displacement_threshold: 0.002  # m
+
+  # Bayesian optimization
+  n_optimization_trials: 100
+  n_initial_samples: 10
+  sampler: "tpe"  # tpe, cmaes, random
+
+  # Parameter bounds
+  friction_bounds:
+    static: [0.1, 2.0]
+    dynamic: [0.05, 1.5]
+
+  contact_bounds:
+    stiffness: [1.0e4, 1.0e7]  # N/m
+    damping: [1.0e2, 1.0e5]    # N·s/m
+    offset: [0.0001, 0.01]     # m
+
+# Validation criteria
+validation:
+  # Phase 0
+  position_rmse_threshold: 0.01  # rad
+
+  # Phase 1
+  r_squared_threshold: 0.95
+
+  # Phase 2
+  I_slip_error_threshold: 0.05  # A

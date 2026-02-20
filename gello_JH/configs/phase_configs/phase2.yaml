@@ -1,0 +1,67 @@
+# Phase 2: Friction & Contact Calibration Configuration
+
+phase: 2
+name: "Friction & Contact Calibration"
+description: "Calibrate friction and contact parameters by matching I_slip"
+
+# Environment settings
+environment:
+  episode_length_s: 30.0
+
+# Slip test protocol
+slip_test:
+  initial_grip_current: 0.5  # A
+  final_grip_current: 0.0    # A
+  current_ramp_duration: 10.0  # seconds
+
+# Slip detection
+slip_detection:
+  method: "velocity"  # velocity, displacement, vision, tactile
+  velocity_threshold: 0.001  # m/s
+  displacement_threshold: 0.002  # m
+
+# Test object
+test_object:
+  shape: "cube"
+  size: [0.04, 0.04, 0.04]  # meters
+  mass: 0.1  # kg
+
+# Optimization
+optimization:
+  method: "bayesian"  # bayesian, grid_search
+  n_trials: 100
+  n_initial_samples: 10
+  sampler: "tpe"  # tpe, cmaes, random
+
+# Parameter bounds
+bounds:
+  static_friction:
+    min: 0.1
+    max: 2.0
+    log_scale: false
+  dynamic_friction:
+    min: 0.05
+    max: 1.5
+    log_scale: false
+  contact_stiffness:
+    min: 1.0e4
+    max: 1.0e7
+    log_scale: true
+  contact_damping:
+    min: 1.0e2
+    max: 1.0e5
+    log_scale: true
+  contact_offset:
+    min: 0.0001
+    max: 0.01
+    log_scale: true
+
+# Loss function
+loss:
+  type: "I_slip_matching"
+  no_slip_penalty: 1.0e6
+
+# Data
+data:
+  real_slip_data_dir: "data/real_data/phase2_slip_data"
+  output_dir: "results/phase2"

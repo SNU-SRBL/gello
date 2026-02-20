@@ -1,6 +1,6 @@
-# Copyright (c) 2025, SRBL
-# Gello_HD Replay Module
+# Trajectory replay utilities
 
-from .gello_trajectory_loader import GelloTrajectoryData, GelloTrajectoryLoader
+from .trajectory_replayer import TrajectoryReplayer
+from .sync_utils import TimeSync, interpolate_trajectory
 
-__all__ = ["GelloTrajectoryData", "GelloTrajectoryLoader"]
+__all__ = ["TrajectoryReplayer", "TimeSync", "interpolate_trajectory"]

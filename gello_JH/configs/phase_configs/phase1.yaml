@@ -1,0 +1,61 @@
+# Phase 1: Current-Torque Calibration Configuration
+
+phase: 1
+name: "Current-Torque Calibration"
+description: "Establish relationship between motor current (I) and joint torque (τ)"
+
+# Environment settings
+environment:
+  episode_length_s: 30.0
+
+# Calibration protocol
+protocol:
+  # Force magnitudes to test (N)
+  force_magnitudes:
+    - 1.0
+    - 2.0
+    - 3.0
+    - 5.0
+    - 7.0
+    - 10.0
+
+  # Force directions
+  force_directions:
+    normal:
+      - 0.0
+      - 0.0
+      - -1.0
+    tangent_x:
+      - 1.0
+      - 0.0
+      - 0.0
+    tangent_y:
+      - 0.0
+      - 1.0
+      - 0.0
+
+  # Number of trials per condition
+  num_trials: 5
+
+  # Settling time after force application
+  settling_time: 1.0  # seconds
+
+# Fingers to calibrate
+fingers:
+  - thumb
+  - index
+
+# Calibration model
+model:
+  type: "linear"  # τ = k_gain × I + k_offset
+
+# Validation
+validation:
+  min_data_points: 5
+  r_squared_threshold: 0.9
+
+# Data
+data:
+  output_dir: "results/phase1"
+  sim_data_file: "sim_force_torque_data.npz"
+  real_data_file: "real_force_current_data.npz"  # From real robot

@@ -1,0 +1,90 @@
+<!-- RH-P12-RN Gripper Complete Model -->
+<mujoco model="rh_p12_rn_gripper">
+  <compiler angle="radian"/>
+  
+  <!-- Assets -->
+  <asset>
+    <!-- Materials -->
+    <material name="gripper_grey" rgba="0.5 0.5 0.5 1"/>
+    <material name="gripper_dark" rgba="0.3 0.3 0.3 1"/>
+
+    <!--Just relative path is allowed in isaac sim mjcf importer-->
+    <!-- Meshes -->
+    <mesh name="base" file="meshes/base.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r1" file="meshes/r1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="r2" file="meshes/r2.STL" scale="0.001 0.001 0.001"/>
+    <mesh name="l1" file="meshes/l1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="l2" file="meshes/l2.STL" scale="0.001 0.001 0.001"/>
+  </asset>
+  
+  <!-- Default settings -->
+  <default>
+    <material specular="0.5" shininess="0.25"/>
+    <geom contype="1" conaffinity="1" group="2"/>
+  </default>
+  
+  <!-- Body Structure -->
+  <worldbody>
+    <!-- RH-P12-RN Base -->
+    <body name="rh_p12_rn_base" pos="0 0 0">
+      <inertial mass="0.236" pos="0 0 0.032" diaginertia="0.00017 0.00011 0.00017"/>
+      <geom mesh="base" material="gripper_grey" rgba="0.5 0.5 0.5 1" type="mesh"/>
+      
+      <!-- Right Finger Chain -->
+      <body name="rh_p12_rn_r1" pos="0 0.008 0.048">
+        <inertial mass="0.068" pos="0 0.034 0.004" diaginertia="0.00004 0.00002 0.00002"/>
+        <joint type="hinge" name="rh_p12_rn_right" axis="1 0 0" range="0 1.6" armature="0.01" damping="0.7" limited="true"/>
+        <geom mesh="r1" material="gripper_grey" rgba="0.5 0.5 0.5 1" type="mesh"/>
+        
+        <!-- Right Finger Tip -->
+        <body name="rh_p12_rn_r2" pos="0 0.0493634 0.0285">
+          <inertial mass="0.022" pos="0 0.006 0.011" diaginertia="0.00001 0.00001 0.00001"/>
+          <joint type="hinge" name="rh_r2" axis="-1 0 0" range="0 1.6" armature="0.005" damping="0.7" limited="true"/>
+          <geom mesh="r2" material="gripper_dark" rgba="0.3 0.3 0.3 1" type="mesh"/>
+        </body>
+      </body>
+      
+      <!-- Left Finger Chain -->
+      <body name="rh_p12_rn_l1" pos="0 -0.008 0.048">
+        <inertial mass="0.068" pos="0 -0.034 0.004" diaginertia="0.00004 0.00002 0.00002"/>
+        <joint type="hinge" name="rh_p12_rn_left" axis="-1 0 0" range="0 1.6" armature="0.01" damping="0.7" limited="true"/>
+        <geom mesh="l1" material="gripper_grey" rgba="0.5 0.5 0.5 1" type="mesh"/>
+        
+        <!-- Left Finger Tip -->
+        <body name="rh_p12_rn_l2" pos="0 -0.0493634 0.0285">
+          <inertial mass="0.022" pos="0 -0.006 0.011" diaginertia="0.00001 0.00001 0.00001"/>
+          <joint type="hinge" name="rh_l2" axis="1 0 0" range="0 1.6" armature="0.005" damping="0.7" limited="true"/>
+          <geom mesh="l2" material="gripper_dark" rgba="0.3 0.3 0.3 1" type="mesh"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+  
+  <!-- Actuators -->
+  <actuator>
+    <!-- Single actuator for synchronized gripper motion -->
+    <position name="gripper_actuator1" joint="rh_p12_rn_right" ctrlrange="0 1.6" kp="100" kv="10" forcerange="-1000 1000"/>
+    <position name="gripper_actuator2" joint="rh_p12_rn_left" ctrlrange="0 1.6" kp="100" kv="10" forcerange="-1000 1000"/>
+    <position name="gripper_actuator3" joint="rh_r2" ctrlrange="0 1.6" kp="100" kv="10" forcerange="-1000 1000"/>
+    <position name="gripper_actuator4" joint="rh_l2" ctrlrange="0 1.6" kp="100" kv="10" forcerange="-1000 1000"/>
+  </actuator>
+  
+  
+  <!--Equality constraints for synchronize motion-->
+  <!-- Synchronize left finger with right finger (mirrored motion) -->
+      <!-- Keep fingertips parallel by moving them opposite to main fingers -->
+  <!--equality is not supported in isaacsim 4.5 mjcf importer-->
+  <!-- <equality>
+    <joint joint1="rh_p12_rn_right" joint2="rh_p12_rn_left" polycoef="0 1 0 0 0"/>
+    <joint joint1="rh_p12_rn_right" joint2="rh_r2" polycoef="0 1 0 0 0"/>
+    <joint joint1="rh_p12_rn_left" joint2="rh_l2" polycoef="0 1 0 0 0"/>
+  </equality> -->
+  
+  <!-- Keyframes for different gripper poses -->
+  <!--keyframe is not supported in isaac sim 4.5-->
+  <!-- <keyframe>
+    <key name="open" qpos="0 0 0 0" ctrl="0"/>
+    <key name="closed" qpos="1.0 1.0 0.8 0.8" ctrl="1.0"/>
+    <key name="half_closed" qpos="0.5 0.5 0.4 0.4" ctrl="0.5"/>
+  </keyframe> -->
+</mujoco>

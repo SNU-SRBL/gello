@@ -1,0 +1,96 @@
+{
+  "codebase_version": "v3.0",
+  "robot_type": "ur5e_tesollo",
+  "fps": 33,
+  "total_episodes": 1,
+  "total_frames": 1956,
+  "total_tasks": 1,
+  "total_videos": 0,
+  "total_chunks": 1,
+  "chunks_size": 1000,
+  "data_path": "data/chunk-{chunk_index:03d}/file-{file_index:03d}.parquet",
+  "video_path": null,
+  "features": {
+    "observation.state.ur5e_joint_pos": {
+      "dtype": "float64",
+      "shape": [
+        6
+      ]
+    },
+    "observation.state.ur5e_joint_vel": {
+      "dtype": "float64",
+      "shape": [
+        6
+      ]
+    },
+    "observation.state.ur5e_current": {
+      "dtype": "float64",
+      "shape": [
+        6
+      ]
+    },
+    "observation.state.ur5e_ee_pos": {
+      "dtype": "float64",
+      "shape": [
+        3
+      ]
+    },
+    "observation.state.ur5e_ee_rot": {
+      "dtype": "float64",
+      "shape": [
+        4
+      ]
+    },
+    "observation.state.index_joint_pos": {
+      "dtype": "float64",
+      "shape": [
+        3
+      ]
+    },
+    "observation.state.index_joint_vel": {
+      "dtype": "float64",
+      "shape": [
+        3
+      ]
+    },
+    "observation.state.index_current": {
+      "dtype": "float64",
+      "shape": [
+        3
+      ]
+    },
+    "observation.sensor.fingertip_ft": {
+      "dtype": "float64",
+      "shape": [
+        6
+      ]
+    },
+    "observation.state.gripper_pos": {
+      "dtype": "float64",
+      "shape": []
+    },
+    "action": {
+      "dtype": "float64",
+      "shape": [
+        9
+      ]
+    },
+    "timestamp": {
+      "dtype": "float64",
+      "shape": []
+    },
+    "frame_index": {
+      "dtype": "int64",
+      "shape": []
+    },
+    "episode_index": {
+      "dtype": "int64",
+      "shape": []
+    }
+  },
+  "source": {
+    "session_name": "HD_0204",
+    "converted_at": "2026-02-04T09:24:38.034371",
+    "original_format": "gello_hd_pkl"
+  }
+}

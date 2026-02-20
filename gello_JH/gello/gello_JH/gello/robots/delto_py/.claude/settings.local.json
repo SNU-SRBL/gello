@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3:*)",
+      "Bash(ln:*)",
+      "Bash(tree:*)",
+      "Bash(dmesg:*)",
+      "Bash(uv sync:*)",
+      "Bash(for i in 1 2 3 4 5)",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(timeout 3 uv run python:*)",
+      "Bash(done)",
+      "Bash(uv run python:*)",
+      "Bash(timeout 15 uv run:*)"
+    ]
+  }
+}
