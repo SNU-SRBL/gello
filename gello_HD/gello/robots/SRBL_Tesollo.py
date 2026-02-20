@@ -45,6 +45,8 @@ class SRBL_Tesollo_gripper:
         self.error_flag = False
         self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 # Joint number of the most tip
 
+        self.init_config = []
+
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
             ip="169.254.186.73", # Set the computer IP to 169.254.286.x where x is any number between 2 and 255 except 73. Used 10
@@ -128,6 +130,7 @@ class SRBL_Tesollo_gripper:
         ring_init = [0.0, 90.0, 90.0, 0.0]
         little_init = [0.0, 0.0, 90.0, 90.0]
         init_pos = thumb_init + index_init + middle_init + ring_init + little_init
+        self.init_config = init_pos
         self.gripper.move_joint_all(init_pos)
 
         # Set shorter time length for gello control
@@ -152,6 +155,12 @@ class SRBL_Tesollo_gripper:
         elif SRBL_type == 1:
             joint_targets = [0.0, joint_target, joint_target, joint_target]
             self.gripper.move_joint_finger(joint_targets, SRBL_TESOLLO_FINGER_NUMBER)
+        elif SRBL_type == 2:
+            joint_targets = self.init_config
+            self.init_config[self.joint_number - 1] = joint_target
+            self.init_config[self.joint_number - 2] = joint_target
+            self.init_config[self.joint_number - 3] = joint_target
+            self.gripper.move_servo_joint(joint_targets)
         return
 
     def get_sensor_values(self):
