@@ -46,6 +46,8 @@ class SRBL_Tesollo_gripper:
         self.joint_number = SRBL_TESOLLO_FINGER_NUMBER * 4 # Joint number of the most tip
         self._cached_gripper_data = None  # Cached gripper data to avoid redundant SDK calls
 
+        self.init_config = []
+
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
             ip="169.254.186.73", # Set the computer IP to 169.254.286.x where x is any number between 2 and 255 except 73. Used 10
