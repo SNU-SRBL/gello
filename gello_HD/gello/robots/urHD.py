@@ -208,7 +208,7 @@ class URInspire(Robot):
             from gello.robots.SRBL_Inspire import SRBL_Inspire_gripper 
             self.gripper = SRBL_Inspire_gripper() 
 
-            print("gripper connected")
+            print("[UR] gripper connected")
             # gripper.activate()
 
         [print("connect") for _ in range(4)]
@@ -267,8 +267,8 @@ class URInspire(Robot):
             robot_joints, velocity, acceleration, dt, lookahead_time, gain
         )
         if self._use_gripper:
-            gripper_pos = int(joint_state[-1]) # Tesollo # CHANGE to corresponding gripper
-            self.gripper.move(gripper_pos) # Tesollo # CHANGE to corresponding gripper
+            gripper_pos = int(joint_state[-1]) # Inspire # CHANGE to corresponding gripper
+            self.gripper.move(gripper_pos) # Inspire # CHANGE to corresponding gripper
         self.robot.waitPeriod(t_start)
 
     def freedrive_enabled(self) -> bool:
@@ -292,21 +292,71 @@ class URInspire(Robot):
             self._free_drive = False
             self.robot.endFreedriveMode()
 
-    def get_finger_sensor(self):
+    def get_joint_velocity(self):
+        robot_joint_velocity = self.r_inter.getActualQd()
+        return robot_joint_velocity
+
+    def get_robot_current(self):
+        robot_current = self.r_inter.getActualCurrent()
+        return robot_current
+    
+    def get_robot_ee_pose(self):
+        robot_ee_pose = self.r_inter.getActualTCPPose()
+        return robot_ee_pose
+
+    def get_finger_sensor_values(self):
         if self._use_gripper:
             return self.gripper.get_sensor_values()
         else:
             return None
 
+    def get_finger_current_values(self):
+        if self._use_gripper:
+            return self.gripper.get_current_values()
+        else:
+            return None
+    
+    def get_finger_velocity_values(self):
+        if self._use_gripper:
+            return self.gripper.get_velocity_values()
+        else:
+            return None
+    
+    def get_finger_position_values(self):
+        if self._use_gripper:
+            return self.gripper.get_position_values()
+        else:
+            return None
+
+    def get_finger_values(self):
+        if self._use_gripper:
+            return self.gripper.get_observation_values()
+        else:
+            return None
+
     def get_observations(self) -> Dict[str, np.ndarray]:
         joints = self.get_joint_state()
-        pos_quat = np.zeros(7)
-        gripper_pos = np.array([joints[-1]])
-        fingertip_sensor = self.get_finger_sensor()
+        robot_velocity = self.get_joint_velocity()
+        robot_current = self.get_robot_current()
+        robot_ee = self.get_robot_ee_pose()
+        if False:
+            finger_pos = self.get_finger_position_values()
+            fingertip_sensor = self.get_finger_sensor_values()
+            finger_current = self.get_finger_current_values()
+            finger_velocity = self.get_finger_velocity_values()
+        else:
+            # Code for calling the data from the gripper once. Not tested yet.
+            # Currently the approach above doesn't seem to cause too much delay.
+            finger_data = self. get_finger_values()
+            finger_pos = finger_data["position"]
+            finger_current = finger_data["current"]
+            fingertip_sensor = finger_data["sensor"]
         return {
             "joint_positions": joints,
-            "joint_velocities": joints,
-            "ee_pos_quat": pos_quat,
-            "gripper_position": gripper_pos,
+            "ee_pose": robot_ee,
+            "finger_positions": finger_pos,
+            "robot_velocity": robot_velocity,
+            "robot_current": robot_current,
             "fingertip_sensor": fingertip_sensor,
+            "finger_current": finger_current, # Maybe can combine with the robot values, but not sure of data type compatibility
         }
