@@ -1,6 +1,7 @@
 """
 File containing the SRBL Inspire gripper class for controlling the gripper and obtaining sensor data.
-Written by Seongjun Koh (Soft Robotics and Bionics Lab, Seoul National University)
+Written by Seongjun Koh (Soft Robotics and Bionics Lab, Seoul National University), based on the Inspire SDK documentation and sample code provided by the manufacturer.
+Last modification: March 13, 2026
 """
 
 import serial
@@ -104,6 +105,16 @@ class SRBL_Inspire_gripper:
             print()
         return val
     
+    def _SRBL_initialize(self):
+        # Initialize gripper to initial pose - all fingers closed with only the target finger open
+        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
+        targets[self.finger - 1] = self.upper_limit
+        val_reg = []
+        for i in range(6):
+            val_reg.append(targets[i] & 0xFF)
+            val_reg.append((targets[i] >> 8) & 0xFF)
+        self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
+    
     def _SRBL_bytes_to_int16(self, val):
         if len(val) < 2:
             raise ValueError("Not enough bytes to convert to int16")
@@ -111,9 +122,17 @@ class SRBL_Inspire_gripper:
         if value > 32767:
             value -= 65536
         return value
+    
+    def _change_target_finger(self, new_finger):
+        if new_finger < 1 or new_finger > 6:
+            raise ValueError("Finger number must be between 1 and 6")
+        self.finger = new_finger
+        self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[new_finger - 1]
+        self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[new_finger - 1]
 
     # region Control with full parameters
     def get_current_position_full(self):
+        # Get position of target finger for GELLO
         val = self._readRegister(1, INSPIRE_regdict['angleAct'], 12, True)
         if len(val) < 12:
             raise RuntimeError("Failed to read gripper position")
@@ -127,9 +146,12 @@ class SRBL_Inspire_gripper:
         return pos
 
     def move_full(self, target):
+        # Move target finger for GELLO with input parameter in [0, 1]
+        # For general use, remove the scaling and offset, and directly set the target position in units of 0.1 degrees
+        # joint order : little, ring, middle, index, thumb bending, thumb rotation
         target = target * (self.upper_limit - self.lower_limit) + self.lower_limit
         target = int(min(self.upper_limit, max(self.lower_limit, target)))
-        targets = [-1, -1, -1, target, -1, -1]
+        targets = [-1, -1, -1, target, -1, -1] # index finger is the target, -1 for no change in other fingers
         val_reg = []
         for i in range(6):
             val_reg.append(targets[i] & 0xFF)
@@ -137,16 +159,18 @@ class SRBL_Inspire_gripper:
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
 
     def get_sensor_values_full(self):
-        # cf) 25 ms delay in the sample code
+        # cf) 25 ms delay in the sample code, which is removed here
         val = self._readRegister(1, INSPIRE_regdict['sensorData'], 68, True) # finger 5*10 + palm 3*6
         if len(val) < 68:
             raise RuntimeError("Failed to read gripper sensor data")
         idx = 10 * (self.finger - 1)
+        # 0-9: little / 0-1: normal, 2-3: tangential, 4-5: tangential direction, 6-9 : proximity (not implemented)
+        # 10-19: ring, 20-29: middle, 30-39: index, 40-49: thumb, 50-67: palm (not implemented)
         normal_val = self._SRBL_bytes_to_int16(val[idx:idx+2])
         tangential_val = self._SRBL_bytes_to_int16(val[idx+2:idx+4])
         tangential_dir = self._SRBL_bytes_to_int16(val[idx+4:idx+6])
-        # Proximity NOT implemented yet
-        normal_val /= 100.0
+        # Proximity NOT implemented
+        normal_val /= 100.0 # convert to N
         tangential_val /= 100.0
         return list(normal_val, tangential_val, tangential_dir)
     
@@ -155,8 +179,9 @@ class SRBL_Inspire_gripper:
         if len(val) < 12:
             raise RuntimeError("Failed to read gripper current data")
         idx = 2 * (self.finger - 1)
+        # 0-1: little, 2-3: ring, 4-5: middle, 6-7: index, 8-9: thumb bending, 10-11: thumb rotation
         current_val = self._SRBL_bytes_to_int16(val[idx:idx+2])
-        current_val /= 1000.0
+        current_val /= 1000.0 # convert mA to A
         return current_val
 
     def get_velocity_values_full(self):
@@ -167,24 +192,22 @@ class SRBL_Inspire_gripper:
         pass
 
     def get_position_values_full(self):
-        pass
+        val = self._readRegister(1, INSPIRE_regdict['angleAct'], 12, True)
+        if len(val) < 12:
+            raise RuntimeError("Failed to read gripper position")
+        val_act = []
+        for i in range(6):
+            value_act = self._SRBL_bytes_to_int16(val[i*2:(i*2)+2])
+            val_act.append(value_act)
+        pos = float(val_act[self.finger - 1])
+        pos /= 10.0 # convert to degrees
+        return pos
 
     def get_observation_values_full(self):
         pass
     # endregion
 
     # region Control one joint at a time
-
-    def _SRBL_initialize(self):
-        # Initialize gripper to initial pose
-        targets = [-1] * 6
-        targets[self.finger - 1] = self.upper_limit
-        val_reg = []
-        for i in range(6):
-            val_reg.append(targets[i] & 0xFF)
-            val_reg.append((targets[i] >> 8) & 0xFF)
-        self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
-    
     def get_current_position(self):
         val = self._readRegister(1, INSPIRE_regdict['angleAct'] + (self.finger - 1), 2, True)
         if len(val) < 2:
