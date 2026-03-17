@@ -106,7 +106,9 @@ class SRBL_Inspire_gripper:
         return val
     
     def _SRBL_initialize(self):
-        # Initialize gripper to initial pose - all fingers closed with only the target finger open
+        '''
+        Initialize gripper to initial pose - all fingers closed with only the target finger open
+        '''
         targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
         targets[self.finger - 1] = self.upper_limit
         val_reg = []
@@ -123,7 +125,10 @@ class SRBL_Inspire_gripper:
             value -= 65536
         return value
     
-    def _change_target_finger(self, new_finger):
+    def change_target_finger(self, new_finger):
+        '''
+        Change the current target finger to control. 'new_finger' should be an integer between 1 and 6, corresponding to little, ring, middle, index, thumb bending, thumb rotation respectively.
+        '''
         if new_finger < 1 or new_finger > 6:
             raise ValueError("Finger number must be between 1 and 6")
         self.finger = new_finger
@@ -132,7 +137,9 @@ class SRBL_Inspire_gripper:
 
     # region Control with full parameters
     def get_current_position_full(self):
-        # Get position of target finger for GELLO
+        '''
+        Get position of target finger for GELLO. Returns a value in [0, 1] corresponding to the normalized position between the lower and upper limits of the target finger. For general use, remove the normalization and directly return the position in units of 0.1 degrees.
+        '''
         val = self._readRegister(1, INSPIRE_regdict['angleAct'], 12, True)
         if len(val) < 12:
             raise RuntimeError("Failed to read gripper position")
@@ -146,9 +153,9 @@ class SRBL_Inspire_gripper:
         return pos
 
     def move_full(self, target):
-        # Move target finger for GELLO with input parameter in [0, 1]
-        # For general use, remove the scaling and offset, and directly set the target position in units of 0.1 degrees
-        # joint order : little, ring, middle, index, thumb bending, thumb rotation
+        '''
+        Move the target finger to the desired position for GELLO. 'target' should be a value in [0, 1] corresponding to the normalized position between the lower and upper limits of the target finger. For general use, remove the normalization and directly input the position in units of 0.1 degrees.
+        '''
         target = target * (self.upper_limit - self.lower_limit) + self.lower_limit
         target = int(min(self.upper_limit, max(self.lower_limit, target)))
         targets = [-1, -1, -1, target, -1, -1] # index finger is the target, -1 for no change in other fingers
