@@ -33,7 +33,7 @@ import numpy as np
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_ROOT = _SCRIPT_DIR.parent
 sys.path.insert(
-    0, str(_PROJECT_ROOT.parent / "gello_HD" / "gello" / "robots" / "delto_py" / "src")
+    0, str(_PROJECT_ROOT / "gello" / "gello_HD" / "gello" / "robots" / "delto_py" / "src")
 )
 
 from dgsdk import (
@@ -54,11 +54,15 @@ TESOLLO_PORT = 502
 NUM_JOINTS = 20
 NUM_FINGERS = 5
 JOINTS_PER_FINGER = 4
-JOINT_RANGE_DEG = (0.0, 30.0)
+JOINT_RANGE_DEG = (0.0, 30.0)          # non-thumb joints
+THUMB_JOINT_RANGE_DEG = (-30.0, 0.0)  # thumb joints that curl with negative angle
+THUMB_NEGATIVE_INDICES = [0, 2, 3]    # thumb joint indices that go negative when curling
+# joint 0: CMC (negative), joint 1: MCP (positive), joints 2,3: IP (negative)
 
-# Abduction joint is index 0 within each finger: [0, 4, 8, 12, 16]
-ABDUCTION_JOINT_INDICES = [i * JOINTS_PER_FINGER for i in range(NUM_FINGERS)]
-ABDUCTION_FIXED_DEG = 0.0  # Fixed abduction angle (degrees)
+# Abduction joints for non-thumb fingers: [4, 8, 12, 16]
+# Thumb joint 0 (CMC) is NOT fixed — it moves with thumb curl
+ABDUCTION_JOINT_INDICES = [i * JOINTS_PER_FINGER for i in range(1, NUM_FINGERS)]
+ABDUCTION_FIXED_DEG = 0.0  # Fixed abduction angle for non-thumb fingers (degrees)
 
 FINGER_NAMES = ["thumb", "index", "middle", "ring", "pinky"]
 FINGER_JOINT_SLICES = {
@@ -80,11 +84,11 @@ FINGER_FT_SLICES = {
 DEG2RAD = np.pi / 180.0
 MA_TO_A = 1.0 / 1000.0
 FT_FORCE_SCALE = 0.1    # 0.1 N → N
-FT_TORQUE_SCALE = 0.001  # 1 mNm → Nm
+FT_TORQUE_SCALE = 0.1    # 0.1 Nm → Nm [DEVELOPER mode, streaming type 0x05] (was: 0.001 assuming 1mNm, which is OPERATOR/Modbus scale)
 
 # Default thresholds
-DEFAULT_CONTACT_THRESHOLD = 0.3     # N
-DEFAULT_RELEASE_THRESHOLD = 0.15    # N
+DEFAULT_CONTACT_THRESHOLD = 1     # N
+DEFAULT_RELEASE_THRESHOLD = 0.4    # N
 DEFAULT_STEADY_VEL_THRESHOLD = 2.0  # RPM
 DEFAULT_SETTLE_TIME = 1.5           # seconds
 DEFAULT_POLL_RATE = 60              # Hz
@@ -109,11 +113,11 @@ class TesolloPhase1Collector:
         self.gripper: Optional[DGGripper] = None
         self.collected_samples: list[dict] = []
 
-        # Servo thread: move_servo_joint 20Hz — trajectory 리셋 없이 부드러운 실시간 제어
+        # Servo thread: move_servo_joint 100Hz — trajectory 리셋 없이 부드러운 실시간 제어
         self._servo_running = False
         self._servo_thread: Optional[threading.Thread] = None
         self._servo_lock = threading.Lock()
-        self._servo_rate_hz = 20  # 20Hz (50ms): move_servo_joint는 trajectory 없이 PD 실시간 업데이트
+        self._servo_rate_hz = 100  # 100Hz (10ms): move_servo_joint는 trajectory 없이 PD 실시간 업데이트
         self._current_q_cmd_deg: Optional[np.ndarray] = None
 
         # Thresholds
@@ -172,9 +176,9 @@ class TesolloPhase1Collector:
             received_data_type=[1, 2, 0, 4, 5, 0],  # JOINT, CURRENT, VELOCITY, FT
         )
         # jointInpose 기본값이 0° → targetArrived 절대 True 안 됨
-        ## 5° 안으로 들어오면 True로 설정
+        ## 6° 안으로 들어오면 True로 설정
         for i in range(NUM_JOINTS):
-            gripper_setting.jointInpose[i] = 5.0
+            gripper_setting.jointInpose[i] = 6.0
         result = self.gripper.set_gripper_option(gripper_setting)
         if result != DGResult.NONE:
             raise RuntimeError(f"Gripper option failed: {result.name}")
@@ -185,9 +189,10 @@ class TesolloPhase1Collector:
         if result != DGResult.NONE:
             raise RuntimeError(f"System start failed: {result.name}")
 
+        self.gripper.set_low_pass_filter(is_used=1, alpha=0.3) 
         time.sleep(0.5)
         self.start_hold()  # servo 먼저 시작
-        time.sleep(0.5)    # 20Hz 서보로 안정화 대기
+        time.sleep(2)    # 20Hz 서보로 안정화 대기
         self.gripper.set_fingertip_data_zero()  # 안정된 상태에서 영점
         print("[OK] Tesollo DG5F initialized (DEVELOPER mode, all 20 joints)")
 
@@ -247,8 +252,12 @@ class TesolloPhase1Collector:
         Returns:
             (30,) array: [Fx,Fy,Fz,Tx,Ty,Tz] × 5 fingers in N and Nm
         """
-        data = self.gripper.get_fingertip_sensor_data()
-        raw = np.array([float(data.forceTorque[i]) for i in range(30)])
+        accumulated = np.zeros(30)
+        n = 10
+        for _ in range(n):
+            data = self.gripper.get_fingertip_sensor_data()
+            accumulated += np.array([float(data.forceTorque[i]) for i in range(30)])
+        raw = accumulated / n
 
         converted = np.zeros(30)
         for finger_i in range(NUM_FINGERS):
@@ -328,10 +337,12 @@ class TesolloPhase1Collector:
             self._servo_thread.start()
 
     def send_q_cmd(self, q_cmd_deg: np.ndarray) -> None:
-        """타겟 업데이트 → servo thread가 20Hz로 move_servo_joint 전송."""
+        """타겟 업데이트 → servo thread가 100Hz로 move_servo_joint 전송."""
         q_clamped = np.clip(q_cmd_deg, JOINT_RANGE_DEG[0], JOINT_RANGE_DEG[1])
-        if not np.allclose(q_clamped, q_cmd_deg):
-            print(f"  [WARN] q_cmd clamped to [{JOINT_RANGE_DEG[0]}, {JOINT_RANGE_DEG[1]}] deg")
+        # 엄지 joints 0,2,3은 음수 범위 (-30 ~ 0)
+        q_clamped[THUMB_NEGATIVE_INDICES] = np.clip(
+            q_cmd_deg[THUMB_NEGATIVE_INDICES], THUMB_JOINT_RANGE_DEG[0], THUMB_JOINT_RANGE_DEG[1]
+        )
         q_clamped[ABDUCTION_JOINT_INDICES] = ABDUCTION_FIXED_DEG
         with self._servo_lock:
             self._current_q_cmd_deg = q_clamped.copy()
@@ -383,8 +394,14 @@ class TesolloPhase1Collector:
             for finger_idx in finger_indices:
                 for val in np.linspace(0.0, 30.0, n):
                     q_cmd = np.full(NUM_JOINTS, neutral)
-                    s = FINGER_JOINT_SLICES[FINGER_NAMES[finger_idx]]
-                    q_cmd[s] = val
+                    if finger_idx == 0:  # thumb: joint1만 0 고정 (테스트)
+                        q_cmd[0] = -val  # CMC: negative
+                        q_cmd[1] = val   # MCP: positive
+                        q_cmd[2] = -val  # IP1: negative
+                        q_cmd[3] = -val  # IP2: negative
+                    else:
+                        s = FINGER_JOINT_SLICES[FINGER_NAMES[finger_idx]]
+                        q_cmd[s] = val
                     positions.append(q_cmd)
             return positions
 
@@ -491,7 +508,6 @@ class TesolloPhase1Collector:
 
         # Move to position
         self.send_q_cmd(q_cmd_deg)
-        self.wait_for_arrival(timeout=5.0)
         self.start_hold()
         time.sleep(self.settle_time)
 
@@ -584,7 +600,6 @@ class TesolloPhase1Collector:
                 # Re-send q_cmd to restore position (finger doesn't return on its own)
                 print("  Restoring q_cmd position...")
                 self.send_q_cmd(q_cmd_deg)
-                self.wait_for_arrival(timeout=3.0)
                 self.start_hold()
                 time.sleep(0.5)
                 # Re-zero FT sensors (position changed, gravity offset may differ)
@@ -672,7 +687,6 @@ class TesolloPhase1Collector:
         # Move to neutral
         neutral = np.full(NUM_JOINTS, 0.0)
         self.send_q_cmd(neutral)
-        self.wait_for_arrival(timeout=5.0)
         self.start_hold()
         time.sleep(1.0)
         self.zero_ft_sensors()
@@ -685,11 +699,11 @@ class TesolloPhase1Collector:
 
                 # Joint positions
                 q_deg = state["q_actual_rad"] / DEG2RAD
-                print(f"Joints (deg): [{', '.join(f'{v:5.1f}' for v in q_deg)}]")
+                print(f"Joints (deg): [{', '.join(f'{v:5.1f}' for v in q_deg)}]\033[K")
 
                 # Currents
                 I_mA = state["I_motor_A"] / MA_TO_A  # back to mA for display
-                print(f"Current (mA): [{', '.join(f'{v:6.1f}' for v in I_mA)}]")
+                print(f"Current (mA): [{', '.join(f'{v:6.1f}' for v in I_mA)}]\033[K")
 
                 # FT per finger
                 for i, name in enumerate(FINGER_NAMES):
@@ -698,9 +712,9 @@ class TesolloPhase1Collector:
                     tx, ty, tz = ft[base + 3], ft[base + 4], ft[base + 5]
                     mag = np.sqrt(fx**2 + fy**2 + fz**2)
                     print(f"  {name:7s}: F=[{fx:6.3f}, {fy:6.3f}, {fz:6.3f}]N  "
-                          f"T=[{tx:7.4f}, {ty:7.4f}, {tz:7.4f}]Nm  |F|={mag:.3f}N")
+                          f"T=[{tx:7.4f}, {ty:7.4f}, {tz:7.4f}]Nm  |F|={mag:.3f}N\033[K")
 
-                print(f"  targetArrived: {state['target_arrived']}")
+                print(f"  targetArrived: {state['target_arrived']}\033[K")
                 # Move cursor up for overwrite (8 lines: Joints + Current + 5 FT + targetArrived)
                 print(f"\033[{NUM_FINGERS + 3}A", end="", flush=True)
 
@@ -753,6 +767,14 @@ class TesolloPhase1Collector:
         if "position_idx" in samples[0]:
             save_dict["config_idx"] = np.array([s["position_idx"] for s in samples])
 
+        # Append mode: load existing file and concatenate
+        if getattr(self.args, "append", False) and Path(output_path).exists():
+            existing = np.load(output_path)
+            for key in save_dict:
+                if key in existing:
+                    save_dict[key] = np.concatenate([existing[key], save_dict[key]], axis=0)
+            print(f"[OK] Appending to existing file ({existing['q'].shape[0]} existing samples)")
+
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         np.savez(output_path, **save_dict)
 
@@ -789,6 +811,10 @@ Examples:
     parser.add_argument(
         "--output", type=str, default="data/Current_Torque/phase1_contact.npz",
         help="Output .npz file path (default: data/Current_Torque/phase1_contact.npz)",
+    )
+    parser.add_argument(
+        "--append", action="store_true",
+        help="Append to existing output file instead of overwriting",
     )
 
     # Position generation

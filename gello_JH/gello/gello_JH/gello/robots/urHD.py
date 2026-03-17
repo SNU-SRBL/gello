@@ -112,11 +112,16 @@ class URTesollo(Robot):
             self._free_drive = False
             self.robot.endFreedriveMode()
 
+    def get_robot_ee_pose(self):
+        robot_ee_pose = self.r_inter.getActualTCPPose()
+        return robot_ee_pose
+
     def get_observations(self) -> Dict[str, np.ndarray]:
         # UR arm data (2 RTDE calls)
         robot_joints = self.r_inter.getActualQ()
         robot_velocity = self.r_inter.getActualQd()
         robot_current = self.r_inter.getActualCurrent()
+        robot_ee = self.r_inter.getActualTCPPose()
 
         if self._use_gripper:
             # Single unified gripper call: 2 SDK calls instead of 5
@@ -125,6 +130,7 @@ class URTesollo(Robot):
             joints = np.append(robot_joints, gripper_pos)
             return {
                 "joint_positions": joints,
+                "ee_pose": robot_ee,
                 "finger_positions": gripper_obs["position"],
                 "robot_velocity": robot_velocity,
                 "robot_current": robot_current,
@@ -136,6 +142,7 @@ class URTesollo(Robot):
         else:
             return {
                 "joint_positions": robot_joints,
+                "ee_pose": robot_ee,
                 "finger_positions": None,
                 "robot_velocity": robot_velocity,
                 "robot_current": robot_current,

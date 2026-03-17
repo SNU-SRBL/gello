@@ -171,12 +171,12 @@ class URTesollo(Robot):
         else:
             # Code for calling the data from the gripper once. Not tested yet.
             # Currently the approach above doesn't seem to cause too much delay.
-            finger_data = self. get_finger_values()
+            finger_data = self.get_finger_values()
             finger_pos = finger_data["position"]
             finger_velocity = finger_data["velocity"]
             finger_current = finger_data["current"]
             fingertip_sensor = finger_data["sensor"]
-            finger_tcp = finger_data["tcp"]
+            # finger_tcp = finger_data["tcp"]
         # finger_data = self.get_finger_values() # position, velocity, current, sensor
         return {
             "joint_positions": joints,
@@ -187,7 +187,7 @@ class URTesollo(Robot):
             "fingertip_sensor": fingertip_sensor,
             "finger_current": finger_current, # Maybe can combine with the robot values, but not sure of data type compatibility
             "finger_velocity": finger_velocity,
-            "finger_tcp": finger_tcp,
+            # "finger_tcp": finger_tcp,
         }
 
 class URInspire(Robot):

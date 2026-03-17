@@ -104,7 +104,10 @@ class SRBL_Tesollo_gripper:
 
         if self.error_flag:
             raise RuntimeError("Failed to initialize the gripper.")
-        
+
+        self.gripper.set_fingertip_data_zero()  # 초기자세에서 센서 영점조정
+        print("[INFO] Fingertip sensor zeroed.")
+
         if self.init_pos:
             self.initialize_finger_position()
         
@@ -132,17 +135,17 @@ class SRBL_Tesollo_gripper:
     def move(self, target):
         joint_target = target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
         joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, joint_target))
-        # Use move_joint_finger() for single Modbus packet instead of 3x move_joint()
-        # Finger joint array: [base, ..., tip] — keep base joint at current value
-        base_idx = self.joint_number - 4  # 0-indexed base joint of this finger
+        # Use move_servo_joint() for real-time servo control (continuous 100Hz stream)
+        # Build full 20-joint command from cached state, update only target finger
         if self._cached_gripper_data is not None:
-            base_joint = float(self._cached_gripper_data.joint[base_idx])
+            q = [float(self._cached_gripper_data.joint[i]) for i in range(20)]
         else:
-            base_joint = 0.0
-        self.gripper.move_joint_finger(
-            [base_joint, joint_target, joint_target, joint_target],
-            SRBL_TESOLLO_FINGER_NUMBER,
-        )
+            q = [0.0] * 20
+        base_idx = self.joint_number - 4  # 0-indexed base joint of this finger
+        q[base_idx + 1] = joint_target
+        q[base_idx + 2] = joint_target
+        q[base_idx + 3] = joint_target
+        self.gripper.move_servo_joint(q)
         return
 
     def get_sensor_values(self):
@@ -150,7 +153,7 @@ class SRBL_Tesollo_gripper:
         lower_idx = 6 * (SRBL_TESOLLO_FINGER_NUMBER - 1)
         upper_idx = 6 * SRBL_TESOLLO_FINGER_NUMBER
         sensor = data.forceTorque[lower_idx:upper_idx] # elements are float type
-        # force in 0.1N, torque in 1mNm
+        # force in 0.1N, torque in 0.1Nm (= 100mNm) [DEVELOPER mode, streaming type 0x05]
         return sensor
 
     def get_fingertip_tcp(self):
@@ -189,7 +192,7 @@ class SRBL_Tesollo_gripper:
     def get_position_values(self):
         data = self.gripper.get_gripper_data()
         position = []
-        position.append(float(data.joint[self.joint_number - 1])) # 0.1 degree?
+        position.append(float(data.joint[self.joint_number - 1])) # degree (SDK converts from raw 0.1deg protocol)
         position.append(float(data.joint[self.joint_number - 2]))
         position.append(float(data.joint[self.joint_number - 3]))
         return position

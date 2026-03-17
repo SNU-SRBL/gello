@@ -134,17 +134,17 @@ class SRBL_Tesollo_gripper:
     def move(self, target):
         joint_target = target * (SRBL_TESOLLO_FINGER_UPPER_LIMIT - SRBL_TESOLLO_FINGER_LOWER_LIMIT) + SRBL_TESOLLO_FINGER_LOWER_LIMIT
         joint_target = min(SRBL_TESOLLO_FINGER_UPPER_LIMIT, max(SRBL_TESOLLO_FINGER_LOWER_LIMIT, joint_target))
-        # Use move_joint_finger() for single Modbus packet instead of 3x move_joint()
-        # Finger joint array: [base, ..., tip] — keep base joint at current value
-        base_idx = self.joint_number - 4  # 0-indexed base joint of this finger
+        # Use move_servo_joint() for real-time servo control (continuous 100Hz stream)
+        # Build full 20-joint command from cached state, update only target finger
         if self._cached_gripper_data is not None:
-            base_joint = float(self._cached_gripper_data.joint[base_idx])
+            q = [float(self._cached_gripper_data.joint[i]) for i in range(20)]
         else:
-            base_joint = 0.0
-        self.gripper.move_joint_finger(
-            [base_joint, joint_target, joint_target, joint_target],
-            SRBL_TESOLLO_FINGER_NUMBER,
-        )
+            q = [0.0] * 20
+        base_idx = self.joint_number - 4  # 0-indexed base joint of this finger
+        q[base_idx + 1] = joint_target
+        q[base_idx + 2] = joint_target
+        q[base_idx + 3] = joint_target
+        self.gripper.move_servo_joint(q)
         return
 
     def get_sensor_values(self):

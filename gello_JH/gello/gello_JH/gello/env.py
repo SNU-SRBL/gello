@@ -86,6 +86,8 @@ class RobotEnv:
         observations["finger_velocity"] = robot_obs["finger_velocity"]
         if "fingertip_tcp" in robot_obs:
             observations["fingertip_tcp"] = robot_obs["fingertip_tcp"]
+        if "ee_pose" in robot_obs:
+            observations["ee_pose"] = robot_obs["ee_pose"]
         return observations
 
 

@@ -34,7 +34,7 @@ from dgsdk import (
 SRBL_TESOLLO_FINGER_LOWER_LIMIT = 0.0 # Lower limit of the finger joint position
 SRBL_TESOLLO_FINGER_UPPER_LIMIT = 30.0 # Upper limit of the finger joint position
 
-SRBL_TESOLLO_FINGER_NUMBER = 2 # Number of the finger to control
+SRBL_TESOLLO_FINGER_NUMBER = 1 # Number of the finger to control
 '''
 1: Thumb / 2: Index / 3: Middle / 4: Ring / 5: Little
 '''
@@ -52,6 +52,7 @@ class SRBL_Tesollo_gripper:
             ip="169.254.186.73", # Set the computer IP to 169.254.286.x where x is any number between 2 and 255 except 73. Used 10
             port=502,
             control_mode=ControlMode.OPERATOR,  # OPERATOR 모드
+            # control_mode=ControlMode.DEVELOPER,
             communication_mode=CommunicationMode.ETHERNET,
             read_timeout=1000,
             slave_id=1,
@@ -124,10 +125,15 @@ class SRBL_Tesollo_gripper:
 
         # Move to initial position
         self.gripper.set_motion_time_all_equal(init_time)
-        thumb_init = [0.0, 0.0, -90.0, 0.0]
-        index_init = [0.0, 0.0, 0.0, 0.0]
+        thumb_init = [0.0, 0.0, 0.0, 0.0]
+        # thumb_init = [0.0, 0.0, -90.0, 0.0]
+        # index_init = [0.0, 0.0, 0.0, 0.0]
+        index_init = [0.0, 90.0, 90.0, 0.0]
+        # middle_init = [0.0, 0.0, 0.0, 0.0]
         middle_init = [0.0, 90.0, 90.0, 0.0]
+        # ring_init = [0.0, 0.0, 0.0, 0.0]
         ring_init = [0.0, 90.0, 90.0, 0.0]
+        # little_init = [0.0, 0.0, 0.0, 0.0]
         little_init = [0.0, 0.0, 90.0, 90.0]
         init_pos = thumb_init + index_init + middle_init + ring_init + little_init
         self.init_config = init_pos
@@ -153,7 +159,9 @@ class SRBL_Tesollo_gripper:
             self.gripper.move_joint(joint_target, self.joint_number - 1)
             self.gripper.move_joint(joint_target, self.joint_number - 2)
         elif SRBL_type == 1:
-            joint_targets = [0.0, joint_target, joint_target, joint_target]
+            # joint_targets = [0.0, joint_target, joint_target, joint_target]
+            # joint_targets = [0.0, 0.0, joint_target, joint_target] #little
+            joint_targets = [0.0, 0.0, -joint_target, -joint_target] # thumb
             self.gripper.move_joint_finger(joint_targets, SRBL_TESOLLO_FINGER_NUMBER)
         elif SRBL_type == 2:
             joint_targets = self.init_config
@@ -222,7 +230,7 @@ class SRBL_Tesollo_gripper:
         
         # Fingertip Sensor
         observation["sensor"] = self.get_sensor_values()
-        observation["tcp"] = self.get_tcp()
+        # observation["tcp"] = self.get_tcp()
 
         return observation
     
