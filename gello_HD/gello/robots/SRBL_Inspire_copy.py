@@ -160,10 +160,11 @@ class SRBL_Inspire_gripper:
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['proximity'] = val[idx+6:idx+10] # TODO: implement proximity data conversion
                 if SJ_tmp_flag:
                     print(f"========")
-                    print(f"{val[idx+6:idx+10]}")
+                    print(f"raw: {val[idx+6:idx+10]}")
+                    print(f"sum: {val[idx+6] + (val[idx+7] << 8) + (val[idx+8] << 16) + (val[idx+9] << 24)}")
                     for i in range(4):
-                        print(f"{val[idx+6+i]:x2}", end=' ')
-                    print(f"{self._SRBL_bytes_to_int16(val[idx+6:idx+8])} / {self._SRBL_bytes_to_int16(val[idx+8:idx+10])}")
+                        print(f"{val[idx+6+i]:x}", end=' ')
+                    print(f"h/l: {self._SRBL_bytes_to_int16(val[idx+6:idx+8])} / {self._SRBL_bytes_to_int16(val[idx+8:idx+10])}")
                     SJ_tmp_flag = False
             for i in range(len(SRBL_INSPIRE_PALM_LIST)):
                 idx = 50 + 6 * i
