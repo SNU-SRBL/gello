@@ -40,7 +40,6 @@ SRBL_INSPIRE_FINGER_UPPER_LIMIT = [1740, 1740, 1740, 1740, 1350, 1800] # Upper l
 class SRBL_Inspire_gripper:
     def __init__(self, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
-        self._SRBL_initialize()
 
     def __del__(self):
         if self.ser and self.ser.is_open:
@@ -66,7 +65,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)
         
         self.ser.write(bytes)                
-        time.sleep(0.01)                
+        time.sleep(0.1)                
         self.ser.read_all() # flush the response
     
     def _readRegister(self, id, add, num, mute=True):
@@ -84,7 +83,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)          
         
         self.ser.write(bytes)           
-        time.sleep(0.01)                
+        time.sleep(0.1)                
         recv = self.ser.read_all()      
         if len(recv) == 0:              
             return []
@@ -107,6 +106,12 @@ class SRBL_Inspire_gripper:
         if value > 32767:
             value -= 65536
         return value
+    
+    def _SRBL_Inspire_proximity(self, vals):
+        if len(vals) != 3:
+            raise ValueError("Invalid proximity sensor data")
+        value = vals[0] + (vals[1] << 8) + (vals[2] << 16)
+        return value
 
     def get_position_values(self):
         '''
@@ -119,10 +124,9 @@ class SRBL_Inspire_gripper:
             raise RuntimeError("Failed to read gripper position")
         val_act = []
         for i in range(6):
-            value_act = self._SRBL_bytes_to_int16(val[i*2:(i*2)+2])
+            value_act = self._SRBL_bytes_to_int16(val[i*2:(i*2)+2]) / 10.0
             val_act.append(value_act)
-        pos = float(val_act[self.finger - 1]) / 10.0 # convert to degrees
-        return pos
+        return val_act
 
     def move_fingers(self, targets, limit=True):
         '''
@@ -145,28 +149,29 @@ class SRBL_Inspire_gripper:
         # cf) 25 ms delay in the sample code, which is removed here
         # 0-9: little / 0-1: normal, 2-3: tangential, 4-5: tangential direction, 6-9 : proximity
         # 10-19: ring, 20-29: middle, 30-39: index, 40-49: thumb, 50-67: palm
-        sensor_vals = {}
+        sensor_vals = {SRBL_INSPIRE_FINGER_LIST[i]: {} for i in range(len(SRBL_INSPIRE_FINGER_LIST))}
         if all:
             # reads all 68 bytes of sensor data (5 fingers * 10 bytes + palm 3*6 bytes)
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 68, True)
             if len(val) < 68:
                 raise RuntimeError("Failed to read gripper sensor data")
-            SJ_tmp_flag = True
+            SJ_tmp_flag = False
             for i in range(len(SRBL_INSPIRE_FINGER_LIST)):
                 idx = 10 * i
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential_dir'] = self._SRBL_bytes_to_int16(val[idx+4:idx+6])
-                sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['proximity'] = val[idx+6:idx+10] # TODO: implement proximity data conversion
+                sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['proximity'] = self._SRBL_Inspire_proximity(val[idx+6:idx+9])
                 if SJ_tmp_flag:
                     print(f"========")
                     print(f"raw: {val[idx+6:idx+10]}")
                     print(f"sum: {val[idx+6] + (val[idx+7] << 8) + (val[idx+8] << 16) + (val[idx+9] << 24)}")
                     for i in range(4):
-                        print(f"{val[idx+6+i]:x}", end=' ')
-                    print(f"h/l: {self._SRBL_bytes_to_int16(val[idx+6:idx+8])} / {self._SRBL_bytes_to_int16(val[idx+8:idx+10])}")
+                        print(f"{val[idx+9-i]:x}", end=' ')
+                    print(f"\nh/l: {self._SRBL_bytes_to_int16(val[idx+8:idx+10])} / {self._SRBL_bytes_to_int16(val[idx+6:idx+8])}")
                     SJ_tmp_flag = False
             for i in range(len(SRBL_INSPIRE_PALM_LIST)):
+                sensor_vals[SRBL_INSPIRE_PALM_LIST[i]] = {}
                 idx = 50 + 6 * i
                 sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N

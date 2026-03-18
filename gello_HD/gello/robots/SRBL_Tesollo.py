@@ -49,7 +49,7 @@ class SRBL_Tesollo_gripper:
 
         self.gripper = DGGripper()
         system_setting = GripperSystemSetting.create(
-            ip="169.254.186.73", # Set the computer IP to 169.254.286.x where x is any number between 2 and 255 except 73. Used 10
+            ip="169.254.186.73", # Set the computer IP to 169.254.186.x where x is any number between 2 and 255 except 73. Used 10
             port=502,
             control_mode=ControlMode.OPERATOR,  # OPERATOR 모드
             # control_mode=ControlMode.DEVELOPER,
