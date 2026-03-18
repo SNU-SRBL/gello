@@ -29,7 +29,8 @@ INSPIRE_regdict = {
     'sensorData' : 3000
 }
 
-SRBL_INSPIRE_FINGER_LIST = ['little', 'ring', 'middle', 'index', 'thumb bending', 'thumb rotation']
+SRBL_INSPIRE_FINGER_LIST = ['finger_little', 'finger_ring', 'finger_middle', 'finger_index', 'finger_thumb_bending', 'finger_thumb_rotation']
+SRBL_INSPIRE_PALM_LIST = ['palm_right', 'palm_middle', 'palm_left']
 
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit of the finger joint position, units of 0.1 degrees
 # 4 fingers : 900, thunmb bending : 1100, thumb rotation : 600
@@ -140,7 +141,7 @@ class SRBL_Inspire_gripper:
             val_reg.append((targets[i] >> 8) & 0xFF)
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
 
-    def get_sensor_values(self, all=False):
+    def get_sensor_values(self, all=True):
         # cf) 25 ms delay in the sample code, which is removed here
         # 0-9: little / 0-1: normal, 2-3: tangential, 4-5: tangential direction, 6-9 : proximity
         # 10-19: ring, 20-29: middle, 30-39: index, 40-49: thumb, 50-67: palm
@@ -150,12 +151,24 @@ class SRBL_Inspire_gripper:
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 68, True)
             if len(val) < 68:
                 raise RuntimeError("Failed to read gripper sensor data")
+            SJ_tmp_flag = True
             for i in range(len(SRBL_INSPIRE_FINGER_LIST)):
                 idx = 10 * i
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential_dir'] = self._SRBL_bytes_to_int16(val[idx+4:idx+6])
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['proximity'] = val[idx+6:idx+10] # TODO: implement proximity data conversion
+                if SJ_tmp_flag:
+                    print(f"========")
+                    print(f"{val[idx+6:idx+10]}")
+                    for i in range(4):
+                        print(f"{val[idx+6+i]:x2}", end=' ')
+                    print(f"{self._SRBL_bytes_to_int16(val[idx+6:idx+8])} / {self._SRBL_bytes_to_int16(val[idx+8:idx+10])}")
+                    SJ_tmp_flag = False
+            for i in range(len(SRBL_INSPIRE_PALM_LIST)):
+                idx = 50 + 6 * i
+                sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
+                sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['proximity'] = val[idx+2:idx+6] # TODO: implement proximity data conversion
         else:
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 46, True) # read only the first 46 bytes for the 5 fingers
             if len(val) < 46:
