@@ -193,12 +193,12 @@ class SRBL_Inspire_gripper:
             - Returns a list of 6 values corresponding to the current for the 6 joints (little, ring, middle, index, thumb bending, thumb rotation).
             - Each value is in Amperes, obtained by reading the 'currAct' register and converting from mA to A.
         '''
-        val = self._readRegister(1, INSPIRE_regdict['currentData'], 12, True)
-        if len(val) < 12:
+        val = self._readRegister(1, INSPIRE_regdict['currAct'], 6, True)
+        if len(val) < 6:
             raise RuntimeError("Failed to read gripper current data")
         current_vals = []
         for i in range(6):
-            current_vals.append(self._SRBL_bytes_to_int16(val[i*2:(i*2)+2]) / 1000.0) # convert mA to A
+            current_vals.append(float(val[i]) / 1000.0) # convert mA to A
         return current_vals
         # little, ring, middle, index, thumb bending, thumb rotation
 
