@@ -2,7 +2,7 @@ import time
 import SRBL_Inspire_copy
 
 def main():
-    gripper = SRBL_Inspire_copy.SRBL_Inspire_gripper(device_name="/dev/ttyUSB1")
+    gripper = SRBL_Inspire_copy.SRBL_Inspire_gripper(device_name="/dev/ttyUSB0")
     finger_lower_limits = SRBL_Inspire_copy.SRBL_INSPIRE_FINGER_LOWER_LIMIT
     finger_upper_limits = SRBL_Inspire_copy.SRBL_INSPIRE_FINGER_UPPER_LIMIT
     SJ_flag = True

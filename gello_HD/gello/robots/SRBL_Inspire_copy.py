@@ -67,7 +67,8 @@ class SRBL_Inspire_gripper:
         
         self.ser.write(bytes)                
         time.sleep(self.sleep_time)                
-        self.ser.read_all() # flush the response
+        # self.ser.read_all() # flush the response
+        self.ser.read(num+8)
     
     def _readRegister(self, id, add, num, mute=True):
         bytes = [0xEB, 0x90]            
@@ -85,7 +86,9 @@ class SRBL_Inspire_gripper:
         
         self.ser.write(bytes)           
         time.sleep(self.sleep_time)                
-        recv = self.ser.read_all()      
+        # recv = self.ser.read_all()    
+        recv = self.ser.read(num+8)
+        # print(f"type(recv): {type(recv)}, len(recv): {len(recv)}, recv: {recv}") # for debugging
         if len(recv) == 0:              
             return []
         num = (recv[3] & 0xFF) - 3      
@@ -157,7 +160,7 @@ class SRBL_Inspire_gripper:
             if len(val) < 68:
                 raise RuntimeError("Failed to read gripper sensor data")
             SJ_tmp_flag = False
-            for i in range(len(SRBL_INSPIRE_FINGER_LIST)):
+            for i in range(5):
                 idx = 10 * i
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N
@@ -181,7 +184,7 @@ class SRBL_Inspire_gripper:
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 46, True) # read only the first 46 bytes for the 5 fingers
             if len(val) < 46:
                 raise RuntimeError("Failed to read gripper sensor data")
-            for i in range(len(SRBL_INSPIRE_FINGER_LIST)):
+            for i in range(5):
                 idx = 10 * i
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['normal'] = self._SRBL_bytes_to_int16(val[idx:idx+2]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_FINGER_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N

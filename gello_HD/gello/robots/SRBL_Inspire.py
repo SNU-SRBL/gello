@@ -40,7 +40,7 @@ class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
         self.finger = finger
-        self.sleep_time = 0.005 # 0.015 didn't work
+        self.sleep_time = 0.005
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
         self._SRBL_initialize()
@@ -70,7 +70,8 @@ class SRBL_Inspire_gripper:
         
         self.ser.write(bytes)                
         time.sleep(self.sleep_time)                
-        self.ser.read_all() # flush the response
+        # self.ser.read_all() # flush the response
+        self.ser.read(num+8)
     
     def _readRegister(self, id, add, num, mute=True):
         bytes = [0xEB, 0x90]            
@@ -90,7 +91,8 @@ class SRBL_Inspire_gripper:
         
         self.ser.write(bytes)           
         time.sleep(self.sleep_time)                
-        recv = self.ser.read_all()      
+        # recv = self.ser.read_all()      
+        recv = self.ser.read(num+8)
         # print(recv)
         if len(recv) == 0:              
             return []
