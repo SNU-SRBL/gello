@@ -40,6 +40,7 @@ SRBL_INSPIRE_FINGER_UPPER_LIMIT = [1740, 1740, 1740, 1740, 1350, 1800] # Upper l
 class SRBL_Inspire_gripper:
     def __init__(self, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
+        self.sleep_time = 0.02
 
     def __del__(self):
         if self.ser and self.ser.is_open:
@@ -65,7 +66,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)
         
         self.ser.write(bytes)                
-        time.sleep(0.1)                
+        time.sleep(self.sleep_time)                
         self.ser.read_all() # flush the response
     
     def _readRegister(self, id, add, num, mute=True):
@@ -83,7 +84,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)          
         
         self.ser.write(bytes)           
-        time.sleep(0.1)                
+        time.sleep(self.sleep_time)                
         recv = self.ser.read_all()      
         if len(recv) == 0:              
             return []
@@ -193,12 +194,12 @@ class SRBL_Inspire_gripper:
             - Returns a list of 6 values corresponding to the current for the 6 joints (little, ring, middle, index, thumb bending, thumb rotation).
             - Each value is in Amperes, obtained by reading the 'currAct' register and converting from mA to A.
         '''
-        val = self._readRegister(1, INSPIRE_regdict['currAct'], 6, True)
-        if len(val) < 6:
+        val = self._readRegister(1, INSPIRE_regdict['currAct'], 12, True)
+        if len(val) < 12:
             raise RuntimeError("Failed to read gripper current data")
         current_vals = []
         for i in range(6):
-            current_vals.append(float(val[i]) / 1000.0) # convert mA to A
+            current_vals.append(self._SRBL_bytes_to_int16(val[i*2:i*2+2]) / 1000.0) # convert mA to A
         return current_vals
         # little, ring, middle, index, thumb bending, thumb rotation
 

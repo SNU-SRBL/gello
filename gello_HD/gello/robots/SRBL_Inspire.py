@@ -40,6 +40,7 @@ class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
         self.finger = finger
+        self.sleep_time = 0.02 # 0.015 didn't work
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
         self._SRBL_initialize()
@@ -68,7 +69,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)
         
         self.ser.write(bytes)                
-        time.sleep(0.1)                
+        time.sleep(self.sleep_time)                
         self.ser.read_all() # flush the response
     
     def _readRegister(self, id, add, num, mute=True):
@@ -88,7 +89,7 @@ class SRBL_Inspire_gripper:
         # print("Writing:", [hex(b) for b in bytes])
         
         self.ser.write(bytes)           
-        time.sleep(0.1)                
+        time.sleep(self.sleep_time)                
         recv = self.ser.read_all()      
         # print(recv)
         if len(recv) == 0:              
@@ -188,21 +189,20 @@ class SRBL_Inspire_gripper:
         return list(normal_val, tangential_val, tangential_dir)
     
     def get_current_values_full(self):
-        val = self._readRegister(1, INSPIRE_regdict['currAct'], 6, True)
-        if len(val) < 6:
+        val = self._readRegister(1, INSPIRE_regdict['currAct'], 12, True)
+        if len(val) < 12:
             raise RuntimeError("Failed to read gripper current data")
-        # idx = 2 * (self.finger - 1)
-        # 0-1: little, 2-3: ring, 4-5: middle, 6-7: index, 8-9: thumb bending, 10-11: thumb rotation
-        current_val = self._SRBL_bytes_to_int16(val[self.finger - 1])
-        current_val /= 1000.0 # convert mA to A
-        return current_val
+        current_vals = []
+        for i in range(6):
+            current_vals.append(self._SRBL_bytes_to_int16(val[i*2:i*2+2]) / 1000.0) # convert mA to A
+        return current_vals
 
     def get_velocity_values_full(self):
         """
         Inspire does not provide velocity data, so this function is not implemented.
         If needed, velocity can be estimated by numerical differentiation of position data.
         """
-        pass
+        return None
 
     def get_position_values_full(self):
         val = self._readRegister(1, INSPIRE_regdict['angleAct'], 12, True)
@@ -217,7 +217,7 @@ class SRBL_Inspire_gripper:
         return pos
 
     def get_observation_values_full(self):
-        pass
+        return None
     # endregion
 
     # region Control one joint at a time
@@ -250,10 +250,10 @@ class SRBL_Inspire_gripper:
         return list(normal_val, tangential_val, tangential_dir)
     
     def get_current_values(self):
-        val = self._readRegister(1, INSPIRE_regdict['currAct'] + (self.finger - 1), 1, True)
-        if len(val) < 1:
+        val = self._readRegister(1, INSPIRE_regdict['currAct'] + (self.finger - 1) * 2, 2, True)
+        if len(val) < 2:
             raise RuntimeError("Failed to read gripper current data")
-        current_val = float(val[0]) / 1000.0
+        current_val = self._SRBL_bytes_to_int16(val) / 1000.0
         return current_val
     
     def get_velocity_values(self):
@@ -276,7 +276,7 @@ class SRBL_Inspire_gripper:
         observation = {}
         observation['position'] = self.get_position_values()
         observation['current'] = self.get_current_values()
-        observation['sensor'] = self.get_sensor_values
+        observation['sensor'] = self.get_sensor_values()
         return observation
     # endregion
 
