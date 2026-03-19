@@ -40,7 +40,7 @@ SRBL_INSPIRE_FINGER_UPPER_LIMIT = [1740, 1740, 1740, 1740, 1350, 1800] # Upper l
 class SRBL_Inspire_gripper:
     def __init__(self, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
-        self.sleep_time = 0.02
+        self.sleep_time = 0.005
 
     def __del__(self):
         if self.ser and self.ser.is_open:

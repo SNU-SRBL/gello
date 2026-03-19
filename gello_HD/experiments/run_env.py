@@ -69,9 +69,10 @@ def main(args):
             usb_ports = glob.glob("/dev/serial/by-id/*")
             print(f"Found {len(usb_ports)} ports")
             if len(usb_ports) > 0:
-                print(list(usb_ports), type(usb_ports[0]))
-                gello_port = usb_ports[0] # Modify for the gello port, assuming only the gello is connected by USB. If there are others, we may need to modify this part. Maybe we can try using -1 index if gello is always the last in the list. We connect gello first, but the list seems to be ordered in reverse.
-                print(f"using port {gello_port}")
+                # print(list(usb_ports), type(usb_ports[0]))
+                gello_port = usb_ports[-1] # Modify for the gello port, assuming only the gello is connected by USB. If there are others, we may need to modify this part. Maybe we can try using -1 index if gello is always the last in the list. We connect gello first, but the list seems to be ordered in reverse.
+                # confirmed that this outputs the ports in the opposite order to how they were connected by USB. Tested by connected GELLO first, then the Inspire hand. The command outputs the Inspire in idx 0 and gello in idx 1.
+                # print(f"using port {gello_port}")
             else:
                 raise ValueError(
                     "No gello port found, please specify one or plug in gello"

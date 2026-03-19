@@ -10,6 +10,7 @@ python scripts/gello_get_offset.py \
     --port /dev/serial/by-id/usb-FTDI_USB__-__Serial_Converter_FTA7NLK4-if00-port0
 
 python experiments/launch_nodes.py --robot urT --robot_ip=192.168.10.2
+python experiments/launch_nodes.py --robot urI --robot_ip=192.168.10.2
 
 python experiments/run_env.py --agent=gello --use_save_interface
 ```

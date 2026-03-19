@@ -40,7 +40,7 @@ class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
         self.finger = finger
-        self.sleep_time = 0.02 # 0.015 didn't work
+        self.sleep_time = 0.005 # 0.015 didn't work
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
         self._SRBL_initialize()
@@ -112,12 +112,15 @@ class SRBL_Inspire_gripper:
         '''
         targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
         targets[self.finger - 1] = self.upper_limit
+        targets[4] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[4]
+        targets[5] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[5]
         val_reg = []
         for i in range(6):
             val_reg.append(targets[i] & 0xFF)
             val_reg.append((targets[i] >> 8) & 0xFF)
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
-    
+        print(f"Init to {targets}")
+
     def _SRBL_bytes_to_int16(self, val):
         if len(val) < 2:
             raise ValueError("Not enough bytes to convert to int16")
@@ -222,35 +225,36 @@ class SRBL_Inspire_gripper:
 
     # region Control one joint at a time
     def get_current_position(self):
-        val = self._readRegister(1, INSPIRE_regdict['angleAct'] + 2 * (self.finger - 1), 2, True)
+        val = self._readRegister(1, INSPIRE_regdict['angleAct'] + (self.finger - 1), 2, True)
         if len(val) < 2:
             raise RuntimeError("Failed to read gripper position")
         value_act = self._SRBL_bytes_to_int16(val)
         pos = float(value_act)
+        # print(f"Raw position value: {pos}")
         pos = min(self.upper_limit, max(self.lower_limit, pos))
-        pos = (pos - self.lower_limit) / (self.upper_limit - self.lower_limit) # normalize to [0, 1]
+        pos = (pos - self.upper_limit) / (self.lower_limit - self.upper_limit) # normalize to [0, 1]
         return pos
     
     def move(self, target):
-        target = target * (self.upper_limit - self.lower_limit) + self.lower_limit
+        target = target * (self.lower_limit - self.upper_limit) + self.upper_limit
         target = int(min(self.upper_limit, max(self.lower_limit, target)))
         val_reg = [target & 0xFF, (target >> 8) & 0xFF]
-        self._writeRegister(1, INSPIRE_regdict['angleSet'] + 2 * (self.finger - 1), 2, val_reg)
+        self._writeRegister(1, INSPIRE_regdict['angleSet'] + (self.finger - 1), 2, val_reg)
     
     def get_sensor_values(self):
         val = self._readRegister(1, INSPIRE_regdict['sensorData'] + (self.finger - 1) * 10, 6, True)
         if len(val) < 6:
             raise RuntimeError("Failed to read gripper sensor data")
-        normal_val = self._SRBL_bytes_to_int16(val[0:2])
-        tangential_val = self._SRBL_bytes_to_int16(val[2:4])
+        normal_val = float(self._SRBL_bytes_to_int16(val[0:2]))
+        tangential_val = float(self._SRBL_bytes_to_int16(val[2:4]))
         tangential_dir = self._SRBL_bytes_to_int16(val[4:6])
         # Proximity NOT implemented yet
         normal_val /= 100.0
         tangential_val /= 100.0
-        return list(normal_val, tangential_val, tangential_dir)
-    
+        return [normal_val, tangential_val, tangential_dir]
+
     def get_current_values(self):
-        val = self._readRegister(1, INSPIRE_regdict['currAct'] + (self.finger - 1) * 2, 2, True)
+        val = self._readRegister(1, INSPIRE_regdict['currAct'] + (self.finger - 1), 2, True)
         if len(val) < 2:
             raise RuntimeError("Failed to read gripper current data")
         current_val = self._SRBL_bytes_to_int16(val) / 1000.0
@@ -264,7 +268,7 @@ class SRBL_Inspire_gripper:
         return None
 
     def get_position_values(self):
-        val = self._readRegister(1, INSPIRE_regdict['angleAct'] + 2 * (self.finger - 1), 2, True)
+        val = self._readRegister(1, INSPIRE_regdict['angleAct'] + (self.finger - 1), 2, True)
         if len(val) < 2:
             raise RuntimeError("Failed to read gripper position")
         value_act = self._SRBL_bytes_to_int16(val)

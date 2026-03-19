@@ -360,4 +360,5 @@ class URInspire(Robot):
             "robot_current": robot_current,
             "fingertip_sensor": fingertip_sensor,
             "finger_current": finger_current, # Maybe can combine with the robot values, but not sure of data type compatibility
+            "finger_velocity": 0, # dummy to match output format
         }
