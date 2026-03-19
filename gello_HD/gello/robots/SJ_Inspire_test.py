@@ -14,8 +14,9 @@ def main():
             target = [int(finger_lower_limits[i]) for i in range(5)]
         target.append(-1) # thumb rotation joint is not changed
         gripper.move_fingers(target)
-        print(gripper.get_position_values())
-        print(gripper.get_sensor_values())
+        print(f"Position values: {gripper.get_position_values()}")
+        print(f"Current values: {gripper.get_current_values()}")
+        print(f"Sensor values: {gripper.get_sensor_values()}")
         time.sleep(1.0)
         SJ_cnt += 1
         if SJ_cnt >= 5:
