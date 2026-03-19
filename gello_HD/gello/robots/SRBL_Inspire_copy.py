@@ -153,9 +153,10 @@ class SRBL_Inspire_gripper:
         # cf) 25 ms delay in the sample code, which is removed here
         # 0-9: little / 0-1: normal, 2-3: tangential, 4-5: tangential direction, 6-9 : proximity
         # 10-19: ring, 20-29: middle, 30-39: index, 40-49: thumb, 50-67: palm
-        sensor_vals = {SRBL_INSPIRE_FINGER_LIST[i]: {} for i in range(len(SRBL_INSPIRE_FINGER_LIST))}
+        
         if all:
             # reads all 68 bytes of sensor data (5 fingers * 10 bytes + palm 3*6 bytes)
+            sensor_vals = {SRBL_INSPIRE_FINGER_LIST[i]: {} for i in range(5)}
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 68, True)
             if len(val) < 68:
                 raise RuntimeError("Failed to read gripper sensor data")
@@ -181,6 +182,7 @@ class SRBL_Inspire_gripper:
                 sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['tangential'] = self._SRBL_bytes_to_int16(val[idx+2:idx+4]) / 100.0 # convert to N
                 sensor_vals[SRBL_INSPIRE_PALM_LIST[i]]['tangential_dir'] = self._SRBL_bytes_to_int16(val[idx+4:idx+6])
         else:
+            sensor_vals = {SRBL_INSPIRE_FINGER_LIST[i]: {} for i in range(5)}
             val = self._readRegister(1, INSPIRE_regdict['sensorData'], 46, True) # read only the first 46 bytes for the 5 fingers
             if len(val) < 46:
                 raise RuntimeError("Failed to read gripper sensor data")
