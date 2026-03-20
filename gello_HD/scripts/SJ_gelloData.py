@@ -4,7 +4,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 data_directory = '../rawdata'
-target_data_directory = '0319_165204'
+target_data_directory = '0320_135038'
 
 class SJ_GelloDataProcessor:
     def __init__(self, data_dir):

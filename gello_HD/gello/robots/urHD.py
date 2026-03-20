@@ -268,7 +268,7 @@ class URInspire(Robot):
             robot_joints, velocity, acceleration, dt, lookahead_time, gain
         )
         if self._use_gripper:
-            gripper_pos = int(joint_state[-1]) # Inspire # CHANGE to corresponding gripper
+            gripper_pos = joint_state[-1] # Inspire # CHANGE to corresponding gripper
             self.gripper.move(gripper_pos) # Inspire # CHANGE to corresponding gripper
         self.robot.waitPeriod(t_start)
 
