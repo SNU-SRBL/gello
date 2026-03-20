@@ -28,7 +28,7 @@ INSPIRE_regdict = {
     'sensorData' : 3000
 }
 
-SRBL_INSPIRE_FINGER_NUMBER = 4 # Number of the finger to control
+SRBL_INSPIRE_FINGER_NUMBER = 1 # Number of the finger to control
 # little, ring, middle, index, thumb bending, thumb rotation
 
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit of the finger joint position, units of 0.1 degrees
@@ -47,10 +47,12 @@ class SRBL_Inspire_gripper:
 
     def __del__(self):
         if self.ser and self.ser.is_open:
+            self._SRBL_close()
             self.ser.close()
 
     def close(self):
         if self.ser and self.ser.is_open:
+            self._SRBL_close()
             self.ser.close()
     
     def _writeRegister(self, id, add, num, val):
@@ -69,7 +71,7 @@ class SRBL_Inspire_gripper:
         bytes.append(checksum)
         
         self.ser.write(bytes)                
-        time.sleep(self.sleep_time)                
+        # time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
         # self.ser.read_all() # flush the response
         self.ser.read(num+8)
     
@@ -90,7 +92,7 @@ class SRBL_Inspire_gripper:
         # print("Writing:", [hex(b) for b in bytes])
         
         self.ser.write(bytes)           
-        time.sleep(self.sleep_time)                
+        # time.sleep(self.sleep_time)                
         # recv = self.ser.read_all()      
         recv = self.ser.read(num+8)
         # print(recv)
@@ -123,7 +125,20 @@ class SRBL_Inspire_gripper:
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
         print(f"Init to {targets}")
 
+    def _SRBL_close(self):
+        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
+        targets[5] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[5]
+        val_reg = []
+        for i in range(6):
+            val_reg.append(targets[i] & 0xFF)
+            val_reg.append((targets[i] >> 8) & 0xFF)
+        self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
+        print(f"Close to {targets}")
+
     def _SRBL_bytes_to_int16(self, val):
+        '''
+        Convert 2 bytes in low-high order to a signed int16 value
+        '''
         if len(val) < 2:
             raise ValueError("Not enough bytes to convert to int16")
         value = val[0] + (val[1] << 8)
@@ -244,16 +259,14 @@ class SRBL_Inspire_gripper:
         self._writeRegister(1, INSPIRE_regdict['angleSet'] + (self.finger - 1), 2, val_reg)
     
     def get_sensor_values(self):
-        val = self._readRegister(1, INSPIRE_regdict['sensorData'] + (self.finger - 1) * 10, 6, True)
+        val = self._readRegister(1, INSPIRE_regdict['sensorData'] + (self.finger - 1) * 10, 10, True)
         if len(val) < 6:
             raise RuntimeError("Failed to read gripper sensor data")
-        normal_val = float(self._SRBL_bytes_to_int16(val[0:2]))
-        tangential_val = float(self._SRBL_bytes_to_int16(val[2:4]))
+        normal_val = self._SRBL_bytes_to_int16(val[0:2]) / 100.0
+        tangential_val = self._SRBL_bytes_to_int16(val[2:4]) / 100.0
         tangential_dir = self._SRBL_bytes_to_int16(val[4:6])
-        # Proximity NOT implemented yet
-        normal_val /= 100.0
-        tangential_val /= 100.0
-        return [normal_val, tangential_val, tangential_dir]
+        proximity = self._SRBL_Inspire_proximity(val[6:9])
+        return [normal_val, tangential_val, tangential_dir, proximity]
 
     def get_current_values(self):
         val = self._readRegister(1, INSPIRE_regdict['currAct'] + (self.finger - 1), 2, True)
