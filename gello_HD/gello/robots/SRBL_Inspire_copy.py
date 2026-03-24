@@ -43,12 +43,16 @@ class SRBL_Inspire_gripper:
         self.sleep_time = 0.001
 
     def __del__(self):
+        print("Deleting gripper")
         if self.ser and self.ser.is_open:
             self.ser.close()
+            print("Destructor called")
 
     def close(self):
+        print("Closing gripper")
         if self.ser and self.ser.is_open:
             self.ser.close()
+            print("Close method executed")
     
     def _writeRegister(self, id, add, num, val):
         bytes = [0xEB, 0x90]            
@@ -69,7 +73,8 @@ class SRBL_Inspire_gripper:
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
         # self.ser.read_all() # flush the response
-        self.ser.read(num+8)
+        # self.ser.read(num+8)
+        return self.ser.read(9)
     
     def _readRegister(self, id, add, num, mute=True):
         bytes = [0xEB, 0x90]            
@@ -88,12 +93,15 @@ class SRBL_Inspire_gripper:
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
-        # recv = self.ser.read_all()    
+        # recv = self.ser.read_all()
+        # print("Write")    
         recv = self.ser.read(num+8)
         # print(f"type(recv): {type(recv)}, len(recv): {len(recv)}, recv: {recv}") # for debugging
         if len(recv) == 0:              
             return []
+        # print(len(recv), recv[:2])
         num = (recv[3] & 0xFF) - 3      
+        # print(num)
         val = []
         for i in range(num):
             value = (recv[7 + i])
@@ -103,6 +111,7 @@ class SRBL_Inspire_gripper:
             for i in range(num):
                 print(val[i], end=' ')
             print()
+        # print("Read complete")
         return val
     
     def _SRBL_bytes_to_int16(self, val):
@@ -149,7 +158,10 @@ class SRBL_Inspire_gripper:
         for i in range(6):
             val_reg.append(targets[i] & 0xFF)
             val_reg.append((targets[i] >> 8) & 0xFF)
-        self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
+        tmp = self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
+        if len(tmp) < 8:
+            print("Failed to move fingers")
+        return
 
     def get_sensor_values(self, all=True):
         # cf) 25 ms delay in the sample code, which is removed here
@@ -222,6 +234,7 @@ class SRBL_Inspire_gripper:
         Get joint positions and current at once.
         """
         val = self._readRegister(1, INSPIRE_regdict['angleAct'], 36, True)
+        # print(len(val))
         if len(val) < 36:
             raise RuntimeError("Failed to read gripper data")
         joint_positions = []
@@ -230,6 +243,6 @@ class SRBL_Inspire_gripper:
             joint_positions.append(pos)
         current_vals = []
         for i in range(6):
-            curr = self._SRBL_bytes_to_int16(val[24+i*2:24+(i*2)+2]) / 1000.0
+            curr = self._SRBL_bytes_to_int16(val[24+(i*2):24+(i*2)+2]) / 1000.0
             current_vals.append(curr)
         return joint_positions, current_vals
