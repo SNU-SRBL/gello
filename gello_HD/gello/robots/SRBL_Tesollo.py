@@ -126,16 +126,23 @@ class SRBL_Tesollo_gripper:
 
         # Move to initial position
         self.gripper.set_motion_time_all_equal(init_time)
-        thumb_init = [0.0, 0.0, 0.0, 0.0]
-        # thumb_init = [0.0, 0.0, -90.0, 0.0]
-        # index_init = [0.0, 0.0, 0.0, 0.0]
-        index_init = [0.0, 90.0, 90.0, 0.0]
-        # middle_init = [0.0, 0.0, 0.0, 0.0]
-        middle_init = [0.0, 90.0, 90.0, 0.0]
-        # ring_init = [0.0, 0.0, 0.0, 0.0]
-        ring_init = [0.0, 90.0, 90.0, 0.0]
-        # little_init = [0.0, 0.0, 0.0, 0.0]
-        little_init = [0.0, 0.0, 90.0, 90.0]
+        # thumb_init = [0.0, 0.0, 0.0, 0.0]
+        # # thumb_init = [0.0, 0.0, -90.0, 0.0]
+        # # index_init = [0.0, 0.0, 0.0, 0.0]
+        # index_init = [0.0, 90.0, 90.0, 0.0]
+        # # middle_init = [0.0, 0.0, 0.0, 0.0]
+        # middle_init = [0.0, 90.0, 90.0, 0.0]
+        # # ring_init = [0.0, 0.0, 0.0, 0.0]
+        # ring_init = [0.0, 90.0, 90.0, 0.0]
+        # # little_init = [0.0, 0.0, 0.0, 0.0]
+        # little_init = [0.0, 0.0, 90.0, 90.0]
+
+        thumb_init = [0.0, 0.0, 0.0, 0.0] if SRBL_TESOLLO_FINGER_NUMBER == 1 else [0.0, 0.0, -90.0, 0.0]
+        index_init = [0.0, 0.0, 0.0, 0.0] if SRBL_TESOLLO_FINGER_NUMBER == 2 else [0.0, 90.0, 90.0, 0.0]
+        middle_init = [0.0, 0.0, 0.0, 0.0] if SRBL_TESOLLO_FINGER_NUMBER == 3 else [0.0, 90.0, 90.0, 0.0]
+        ring_init = [0.0, 0.0, 0.0, 0.0] if SRBL_TESOLLO_FINGER_NUMBER == 4 else [0.0, 90.0, 90.0, 0.0]
+        little_init = [0.0, 0.0, 0.0, 0.0] if SRBL_TESOLLO_FINGER_NUMBER == 5 else [0.0, 0.0, 90.0, 90.0]
+
         init_pos = thumb_init + index_init + middle_init + ring_init + little_init
         self.init_config = init_pos
         self.gripper.move_joint_all(init_pos)
@@ -160,9 +167,15 @@ class SRBL_Tesollo_gripper:
             self.gripper.move_joint(joint_target, self.joint_number - 1)
             self.gripper.move_joint(joint_target, self.joint_number - 2)
         elif SRBL_type == 1:
-            # joint_targets = [0.0, joint_target, joint_target, joint_target]
-            # joint_targets = [0.0, 0.0, joint_target, joint_target] #little
-            joint_targets = [0.0, 0.0, -joint_target, -joint_target] # thumb
+            # # joint_targets = [0.0, joint_target, joint_target, joint_target]
+            # # joint_targets = [0.0, 0.0, joint_target, joint_target] #little
+            # joint_targets = [0.0, 0.0, -joint_target, -joint_target] # thumb
+            if SRBL_TESOLLO_FINGER_NUMBER == 1:
+                joint_targets = [0.0, 0.0, -joint_target, -joint_target] # thumb
+            elif SRBL_TESOLLO_FINGER_NUMBER == 5:
+                joint_targets = [0.0, 0.0, joint_target, joint_target] # little
+            else:
+                joint_targets = [0.0, joint_target, joint_target, joint_target] # index, middle, ring
             self.gripper.move_joint_finger(joint_targets, SRBL_TESOLLO_FINGER_NUMBER)
         elif SRBL_type == 2:
             joint_targets = self.init_config
