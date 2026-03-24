@@ -216,3 +216,20 @@ class SRBL_Inspire_gripper:
         If needed, velocity can be estimated by numerical differentiation of position data.
         """
         pass
+
+    def get_all_once(self):
+        """
+        Get joint positions and current at once.
+        """
+        val = self._readRegister(1, INSPIRE_regdict['angleAct'], 36, True)
+        if len(val) < 36:
+            raise RuntimeError("Failed to read gripper data")
+        joint_positions = []
+        for i in range(6):
+            pos = self._SRBL_bytes_to_int16(val[i*2:(i*2)+2]) / 10.0
+            joint_positions.append(pos)
+        current_vals = []
+        for i in range(6):
+            curr = self._SRBL_bytes_to_int16(val[24+i*2:24+(i*2)+2]) / 1000.0
+            current_vals.append(curr)
+        return joint_positions, current_vals
