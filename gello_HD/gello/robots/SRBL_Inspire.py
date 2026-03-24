@@ -40,7 +40,7 @@ class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
         self.finger = finger
-        self.sleep_time = 0.005
+        self.sleep_time = 0.001
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
         self._SRBL_initialize()
@@ -70,7 +70,8 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)
         
-        self.ser.write(bytes)                
+        self.ser.write(bytes)    
+        self.ser.flush() # ensure all data is sent before proceeding            
         time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
         # self.ser.read_all() # flush the response
         self.ser.read(num+8)
@@ -91,7 +92,8 @@ class SRBL_Inspire_gripper:
         
         # print("Writing:", [hex(b) for b in bytes])
         
-        self.ser.write(bytes)           
+        self.ser.write(bytes)
+        self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
         # recv = self.ser.read_all()      
         recv = self.ser.read(num+8)
@@ -292,11 +294,28 @@ class SRBL_Inspire_gripper:
         pos /= 10.0
         return pos
 
+    def get_once_values(self):
+        recv = self._readRegister(1, INSPIRE_regdict['angleAct'], 36, True)
+        if len(recv) < 36:
+            raise RuntimeError(f"Failed to read gripper data: len={len(recv)}")
+        vals = {}
+        vals['position'] = self._SRBL_bytes_to_int16(recv[2*(self.finger-1):2*(self.finger-1)+2]) / 10.0
+        vals['force'] = self._SRBL_bytes_to_int16(recv[2*(self.finger-1)+12:2*(self.finger-1)+14]) / 100.0
+        vals['current'] = self._SRBL_bytes_to_int16(recv[2*(self.finger-1)+24:2*(self.finger-1)+26]) / 1000.0
+        return vals
+
     def get_observation_values(self):
         observation = {}
-        observation['position'] = self.get_position_values()
-        observation['current'] = self.get_current_values()
-        observation['sensor'] = self.get_sensor_values()
+        if False:
+            observation['position'] = self.get_position_values()
+            observation['current'] = self.get_current_values()
+            observation['sensor'] = self.get_sensor_values()
+        else:
+            vals = self.get_once_values()
+            observation['position'] = vals['position']
+            observation['current'] = vals['current']
+            observation['sensor'] = self.get_sensor_values()
+            observation['sensor'].append(vals['force'])
         return observation
     # endregion
 
