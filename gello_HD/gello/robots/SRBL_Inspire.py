@@ -36,7 +36,7 @@ SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit 
 SRBL_INSPIRE_FINGER_UPPER_LIMIT = [1740, 1740, 1740, 1740, 1350, 1800] # Upper limit of the finger joint position, units of 0.1 degrees
 # 4 fingers : 1740, thunmb bending : 1350, thumb rotation : 1800
 
-SRBL_INSPIRE_BAUDRATE_DICT = {115200: 0, 57600: 1, 19200: 2, 921600: 3}
+SRBL_INSPIRE_BAUDRATE_DICT = {115200: [0,0], 57600: [1,0], 19200: [2,0], 921600: [3,0]}
 
 class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
@@ -45,6 +45,7 @@ class SRBL_Inspire_gripper:
         self.sleep_time = 0.001
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
+        self._SRBL_change_baudrate(921600)
         self._SRBL_initialize()
 
     def __del__(self):
@@ -63,7 +64,8 @@ class SRBL_Inspire_gripper:
         bytes.append(num + 3)           
         bytes.append(0x12)              
         bytes.append(add & 0xFF)        
-        bytes.append((add >> 8) & 0xFF) 
+        bytes.append((add >> 8) & 0xFF)
+        # print(val)
         for i in range(num):
             bytes.append(val[i])
         checksum = 0x00                 
@@ -76,7 +78,9 @@ class SRBL_Inspire_gripper:
         self.ser.flush() # ensure all data is sent before proceeding            
         time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
         # self.ser.read_all() # flush the response
-        self.ser.read(9)
+        recv = self.ser.read(9)
+        if len(recv) < 9:
+            print("[Inspire] No response")
     
     def _readRegister(self, id, add, num, mute=True):
         bytes = [0xEB, 0x90]            
@@ -128,18 +132,20 @@ class SRBL_Inspire_gripper:
             val_reg.append(targets[i] & 0xFF)
             val_reg.append((targets[i] >> 8) & 0xFF)
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
-        print(f"Init to {targets}")
+        print(f"[Inspire] Init to {targets}")
 
     def _SRBL_change_baudrate(self, new_baudrate):
         if new_baudrate not in SRBL_INSPIRE_BAUDRATE_DICT:
             raise ValueError("Unsupported baudrate. Supported baudrates are: " + ", ".join(str(b) for b in SRBL_INSPIRE_BAUDRATE_DICT.keys()))
         print("Changing baudrate to: ", new_baudrate)
-        self._writeRegister(1, INSPIRE_regdict['baudrate'], 2, [SRBL_INSPIRE_BAUDRATE_DICT[new_baudrate]])
-        time.sleep(0.1) # wait for the gripper to apply the new baudrate
-        self.ser.close()
+        self._writeRegister(1, INSPIRE_regdict['baudrate'], 2, SRBL_INSPIRE_BAUDRATE_DICT[new_baudrate])
+        time.sleep(1.0) # wait for the gripper to apply the new baudrate
+        # self.ser.close()
         self.ser.baudrate = new_baudrate
-        self.ser.open()
-        time.sleep(0.1) # wait for the serial connection to stabilize after changing baudrate
+        # self.ser.open()
+        time.sleep(1.0) # wait for the serial connection to stabilize after changing baudrate
+        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
         print("Baudrate changed successfully")
 
     def _SRBL_close(self):
@@ -150,7 +156,7 @@ class SRBL_Inspire_gripper:
             val_reg.append(targets[i] & 0xFF)
             val_reg.append((targets[i] >> 8) & 0xFF)
         self._writeRegister(1, INSPIRE_regdict['angleSet'], 12, val_reg)
-        print(f"Close to {targets}")
+        # print(f"Close to {targets}")
 
     def _SRBL_bytes_to_int16(self, val):
         '''
