@@ -72,8 +72,6 @@ class SRBL_Inspire_gripper:
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
-        # self.ser.read_all() # flush the response
-        # self.ser.read(num+8)
         return self.ser.read(9)
     
     def _readRegister(self, id, add, num, mute=True):
@@ -93,15 +91,11 @@ class SRBL_Inspire_gripper:
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
-        # recv = self.ser.read_all()
-        # print("Write")    
         recv = self.ser.read(num+8)
-        # print(f"type(recv): {type(recv)}, len(recv): {len(recv)}, recv: {recv}") # for debugging
+
         if len(recv) == 0:              
             return []
-        # print(len(recv), recv[:2])
         num = (recv[3] & 0xFF) - 3      
-        # print(num)
         val = []
         for i in range(num):
             value = (recv[7 + i])
@@ -111,7 +105,6 @@ class SRBL_Inspire_gripper:
             for i in range(num):
                 print(val[i], end=' ')
             print()
-        # print("Read complete")
         return val
     
     def _SRBL_bytes_to_int16(self, val):
@@ -234,7 +227,6 @@ class SRBL_Inspire_gripper:
         Get joint positions and current at once.
         """
         val = self._readRegister(1, INSPIRE_regdict['angleAct'], 36, True)
-        # print(len(val))
         if len(val) < 36:
             raise RuntimeError("Failed to read gripper data")
         joint_positions = []
