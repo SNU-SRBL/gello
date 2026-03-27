@@ -28,7 +28,7 @@ INSPIRE_regdict = {
     'sensorData' : 3000
 }
 
-SRBL_INSPIRE_FINGER_NUMBER = 1 # Number of the finger to control
+SRBL_INSPIRE_FINGER_NUMBER = 4 # Number of the finger to control
 # little, ring, middle, index, thumb bending, thumb rotation
 
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit of the finger joint position, units of 0.1 degrees
@@ -45,7 +45,7 @@ class SRBL_Inspire_gripper:
         self.sleep_time = 0.001
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
-        self._SRBL_change_baudrate(921600)
+        # self._SRBL_change_baudrate(921600)
         self._SRBL_initialize()
 
     def __del__(self):
@@ -74,6 +74,7 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)
         
+        self.ser.reset_input_buffer()
         self.ser.write(bytes)    
         self.ser.flush() # ensure all data is sent before proceeding            
         time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
@@ -96,15 +97,16 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)          
         
-        # print("Writing:", [hex(b) for b in bytes])
+        print("Writing:", [hex(b) for b in bytes])
         
+        self.ser.reset_input_buffer()
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
         # recv = self.ser.read_all()      
         recv = self.ser.read(num+8)
         # print(f"Read len check : {len(recv)} / {num+8}")
-        # print(recv)
+        print(recv)
         if len(recv) == 0:              
             return []
         num = (recv[3] & 0xFF) - 3      

@@ -31,7 +31,7 @@ def main():
             freq = SJ_cnt / (curr_time - prev_time)
             print(f"freq: {freq}, dt: {curr_time - prev_time}")
             prev_time = curr_time
-            # SJ_flag = not SJ_flag
+            SJ_flag = not SJ_flag
             SJ_cnt = 0
 
 if __name__ == "__main__":
