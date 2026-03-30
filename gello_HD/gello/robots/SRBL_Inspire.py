@@ -42,7 +42,7 @@ class SRBL_Inspire_gripper:
     def __init__(self, finger=SRBL_INSPIRE_FINGER_NUMBER, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
         self.finger = finger
-        self.sleep_time = 0.001
+        self.sleep_time = 0.002
         self.upper_limit = SRBL_INSPIRE_FINGER_UPPER_LIMIT[finger - 1]
         self.lower_limit = SRBL_INSPIRE_FINGER_LOWER_LIMIT[finger - 1]
         # self._SRBL_change_baudrate(921600)
@@ -77,9 +77,10 @@ class SRBL_Inspire_gripper:
         self.ser.reset_input_buffer()
         self.ser.write(bytes)    
         self.ser.flush() # ensure all data is sent before proceeding            
-        time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
+        # time.sleep(self.sleep_time) # may not be necessary to sleep after writing, as the read function will wait for the response
         # self.ser.read_all() # flush the response
         recv = self.ser.read(9)
+        time.sleep(self.sleep_time)
         if len(recv) < 9:
             print("[Inspire] No response")
     
@@ -102,12 +103,14 @@ class SRBL_Inspire_gripper:
         self.ser.reset_input_buffer()
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
-        time.sleep(self.sleep_time)                
+        # time.sleep(self.sleep_time)                
         # recv = self.ser.read_all()      
         recv = self.ser.read(num+8)
+        time.sleep(self.sleep_time)
         # print(f"Read len check : {len(recv)} / {num+8}")
-        print(recv)
-        if len(recv) == 0:              
+        # print(recv)
+        if len(recv) < (num + 8):              
+            print(f"[Inspire] Incomplete response: {recv}")
             return []
         num = (recv[3] & 0xFF) - 3      
         val = []
