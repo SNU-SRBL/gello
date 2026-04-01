@@ -98,7 +98,7 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)          
         
-        print("Writing:", [hex(b) for b in bytes])
+        # print("Writing:", [hex(b) for b in bytes])
         
         self.ser.reset_input_buffer()
         self.ser.write(bytes)
