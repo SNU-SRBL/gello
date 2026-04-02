@@ -40,7 +40,7 @@ SRBL_INSPIRE_FINGER_UPPER_LIMIT = [1740, 1740, 1740, 1740, 1350, 1800] # Upper l
 class SRBL_Inspire_gripper:
     def __init__(self, device_name="/dev/ttyUSB1", baudrate=115200):
         self.ser = serial.Serial(device_name, baudrate, timeout=0.1)
-        self.sleep_time = 0.001
+        self.sleep_time = 0.002
 
     def __del__(self):
         print("Deleting gripper")
@@ -69,6 +69,7 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)
         
+        self.ser.reset_input_buffer()
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
         time.sleep(self.sleep_time)                
@@ -88,10 +89,11 @@ class SRBL_Inspire_gripper:
         checksum &= 0xFF                
         bytes.append(checksum)          
         
+        self.ser.reset_input_buffer()
         self.ser.write(bytes)
         self.ser.flush() # ensure all data is sent before proceeding
-        time.sleep(self.sleep_time)                
         recv = self.ser.read(num+8)
+        time.sleep(self.sleep_time)
 
         if len(recv) == 0:              
             return []
@@ -238,3 +240,9 @@ class SRBL_Inspire_gripper:
             curr = self._SRBL_bytes_to_int16(val[24+(i*2):24+(i*2)+2]) / 1000.0
             current_vals.append(curr)
         return joint_positions, current_vals
+    
+    def sensor_calibration(self):
+        '''
+        Sensor calibration in case the hand malfunctions due to excessive force.
+        '''
+        self._writeRegister(1, INSPIRE_regdict['forceClb'], 2, [0, 1])
