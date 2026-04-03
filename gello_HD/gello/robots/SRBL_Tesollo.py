@@ -241,7 +241,7 @@ class SRBL_Tesollo_gripper:
             observation["position"].append(float(data.joint[i]))
             observation["velocity"].append(float(data.velocity[i]))
             observation["current"].append(float(data.current[i]) / 1000.0) # convert mA to A
-        
+        print(f"Positions: {observation['position']}")
         # Fingertip Sensor
         observation["sensor"] = self.get_sensor_values()
         # observation["tcp"] = self.get_tcp()
