@@ -65,23 +65,16 @@ class SJ_GelloDataProcessor:
         data = self.get_data_dict()
         num = len(data) - 1
         time = data['time']
+        normal = [0] * len(time)
+        tangential = [0] * len(time)
         start_time = time[0]
         for i in range(len(time)):
             time[i] = (time[i] - start_time).total_seconds()
-        rows = 2
-        cols = (num + 1) // rows
-        fig, ax = plt.subplots(rows, cols, figsize=(15, 10))
-        idx = 0
-        for key, values in data.items():
-            if key != 'time':
-                r = idx // cols
-                c = idx % cols
-
-                ax[r, c].plot(time, values)
-                ax[r, c].set_title(key)
-                ax[r, c].legend([i for i in range(7)])
-                idx += 1
-        plt.tight_layout()
+            normal[i] = data['fingertip_sensor'][i][0]
+            tangential[i] = data['fingertip_sensor'][i][1]
+        plt.plot(time, normal, label='Normal')
+        plt.plot(time, tangential, label='Tangential')
+        plt.legend()
         plt.show()
 
 if __name__ == "__main__":

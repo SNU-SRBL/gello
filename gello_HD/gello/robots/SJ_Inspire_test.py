@@ -5,7 +5,7 @@ def main():
     gripper = SRBL_Inspire_copy.SRBL_Inspire_gripper(device_name="/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_BG027RUV-if00-port0")
     finger_lower_limits = SRBL_Inspire_copy.SRBL_INSPIRE_FINGER_LOWER_LIMIT
     finger_upper_limits = SRBL_Inspire_copy.SRBL_INSPIRE_FINGER_UPPER_LIMIT
-    SJ_flag = True
+    SJ_flag = False
     SJ_cnt = 0
     prev_time = time.perf_counter()
     while True:
@@ -26,12 +26,13 @@ def main():
         # time.sleep(0.01)
         SJ_cnt += 1
         # print(SJ_cnt)
-        if SJ_cnt >= 100:
-            curr_time = time.perf_counter()
-            freq = SJ_cnt / (curr_time - prev_time)
-            print(f"freq: {freq}, dt: {curr_time - prev_time}")
-            prev_time = curr_time
-            SJ_flag = not SJ_flag
+        if SJ_cnt >= 10:
+            # curr_time = time.perf_counter()
+            # freq = SJ_cnt / (curr_time - prev_time)
+            # print(f"freq: {freq}, dt: {curr_time - prev_time}")
+            # prev_time = curr_time
+            # SJ_flag = not SJ_flag
+            print(sens['finger_little'])
             SJ_cnt = 0
 
 if __name__ == "__main__":
