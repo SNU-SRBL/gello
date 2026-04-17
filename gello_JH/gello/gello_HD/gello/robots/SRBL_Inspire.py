@@ -28,11 +28,11 @@ INSPIRE_regdict = {
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = 900 # Lower limit of the finger joint position, units of 0.1 degrees
 SRBL_INSPIRE_FINGER_UPPER_LIMIT = 1740 # Upper limit of the finger joint position, units of 0.1 degrees
 
-SRBL_INSPIRE_FINGER_NUMBER = 4 # Number of the finger to control
+SRBL_INSPIRE_FINGER_NUMBER = 3 # Number of the finger to control
 
 class SRBL_Inspire_gripper:
     def __init__(self):
-        self.ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.1)
+        self.ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
 
     def __del__(self):
         self.ser.close()
@@ -108,7 +108,7 @@ class SRBL_Inspire_gripper:
     def move(self, target):
         target = target * (SRBL_INSPIRE_FINGER_UPPER_LIMIT - SRBL_INSPIRE_FINGER_LOWER_LIMIT) + SRBL_INSPIRE_FINGER_LOWER_LIMIT
         target = int(min(SRBL_INSPIRE_FINGER_UPPER_LIMIT, max(SRBL_INSPIRE_FINGER_LOWER_LIMIT, target)))
-        targets = [-1, -1, -1, target, -1, -1]
+        targets = [-1, -1, target, -1, -1, -1]
         val_reg = []
         for i in range(6):
             val_reg.append(targets[i] & 0xFF)

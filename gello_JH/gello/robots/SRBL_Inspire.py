@@ -32,7 +32,7 @@ SRBL_INSPIRE_FINGER_NUMBER = 4 # Number of the finger to control
 
 class SRBL_Inspire_gripper:
     def __init__(self):
-        self.ser = serial.Serial('/dev/ttyUSB1', 115200, timeout=0.1)
+        self.ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=0.1)
 
     def __del__(self):
         self.ser.close()
@@ -72,8 +72,8 @@ class SRBL_Inspire_gripper:
         
         # print("Writing:", [hex(b) for b in bytes])
         
-        self.ser.write(bytes)           
-        time.sleep(0.01)                
+        self.ser.write(bytes)
+        time.sleep(0.05)
         recv = self.ser.read_all()      
         # print(recv)
         if len(recv) == 0:              
