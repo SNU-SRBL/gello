@@ -22,3 +22,9 @@ echo 1 | sudo tee /sys/bus/usb-serial/devices/ttyUSB1/latency_timer
 ls -l /dev/ttyUSB*
 ls -l /dev/serial/by-id/
 ```
+
+---
+
+```bash
+python -m scripts.SJ_inspire_test COM3
+```
