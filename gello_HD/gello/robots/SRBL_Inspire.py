@@ -288,7 +288,7 @@ class SRBL_Inspire_gripper:
         self._writeRegister(1, INSPIRE_regdict['angleSet'] + (self.finger - 1), 2, val_reg)
     
     def get_sensor_values(self):
-        val = self._readRegister(1, INSPIRE_regdict['sensorData'] + (self.finger - 1) * 10, 10, True)
+        val = self._readRegister(1, INSPIRE_regdict['sensorData'] + (self.finger - 1) * 5, 10, True)
         if len(val) < 10:
             raise RuntimeError(f"Failed to read gripper sensor data: len={len(val)}")
         normal_val = self._SRBL_bytes_to_int16(val[0:2]) / 100.0
