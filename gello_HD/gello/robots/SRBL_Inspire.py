@@ -28,7 +28,7 @@ INSPIRE_regdict = {
     'sensorData' : 3000
 }
 
-SRBL_INSPIRE_FINGER_NUMBER = 5 # Number of the finger to control
+SRBL_INSPIRE_FINGER_NUMBER = 3 # Number of the finger to control
 # little, ring, middle, index, thumb bending, thumb rotation
 
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit of the finger joint position, units of 0.1 degrees
@@ -128,7 +128,7 @@ class SRBL_Inspire_gripper:
         '''
         Initialize gripper to initial pose - all fingers closed with only the target finger open
         '''
-        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
+        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i]+100 for i in range(6)]
         targets[self.finger - 1] = self.upper_limit
         targets[4] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[4]
         targets[5] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[5]
@@ -154,7 +154,7 @@ class SRBL_Inspire_gripper:
         print("Baudrate changed successfully")
 
     def _SRBL_close(self):
-        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i] for i in range(6)]
+        targets = [SRBL_INSPIRE_FINGER_LOWER_LIMIT[i]+100 for i in range(6)]
         targets[4] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[4]
         targets[5] = SRBL_INSPIRE_FINGER_UPPER_LIMIT[5]
         val_reg = []

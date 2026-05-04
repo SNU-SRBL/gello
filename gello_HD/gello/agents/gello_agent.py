@@ -101,7 +101,7 @@ PORT_CONFIG_MAP: Dict[str, DynamixelRobotConfig] = {
             1 * np.pi / 2,
         ),
         joint_signs=(1, 1, -1, 1, 1, 1),
-        gripper_config=(7, 297, 256),
+        gripper_config=(7, 298, 257),
     ),
 }
 
