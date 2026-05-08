@@ -28,7 +28,7 @@ INSPIRE_regdict = {
     'sensorData' : 3000
 }
 
-SRBL_INSPIRE_FINGER_NUMBER = 1 # Number of the finger to control
+SRBL_INSPIRE_FINGER_NUMBER = 4 # Number of the finger to control
 # little, ring, middle, index, thumb bending, thumb rotation
 
 SRBL_INSPIRE_FINGER_LOWER_LIMIT = [900, 900, 900, 900, 1100, 600] # Lower limit of the finger joint position, units of 0.1 degrees
